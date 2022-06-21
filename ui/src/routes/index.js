@@ -1,9 +1,6 @@
 "use strict";
 
-import Vue from "vue";
-import VueRouter from "vue-router";
-Vue.use(VueRouter);
-
+import { createRouter, createWebHistory } from "vue-router";
 import ShellComponent from "components/Shell.component.vue";
 import BadRequestComponent from "components/BadRequest.component.vue";
 import HealthCheckComponent from "components/HealthCheck.component.vue";
@@ -19,17 +16,17 @@ export function router({ configuration }) {
         {
             name: "HealthCheck",
             path: "/health-check",
-            component: HealthCheckComponent
+            component: HealthCheckComponent,
         },
         {
             name: "About",
             path: "/about",
-            component: AboutComponent
+            component: AboutComponent,
         },
         {
             name: "Support",
             path: "/support",
-            component: SupportComponent
+            component: SupportComponent,
         },
         {
             path: "/",
@@ -37,18 +34,18 @@ export function router({ configuration }) {
             children: [
                 {
                     path: "/",
-                    component: IntroductionComponent
+                    component: IntroductionComponent,
                 },
                 {
                     path: "explore",
-                    component: ExploreComponent
+                    component: ExploreComponent,
                 },
                 {
                     path: "view*",
-                    component: ViewComponent
-                }
-            ]
-        }
+                    component: ViewComponent,
+                },
+            ],
+        },
     ];
     if (configuration.domain) {
         try {
@@ -59,10 +56,10 @@ export function router({ configuration }) {
         }
     }
 
-    const router = new VueRouter({
-        mode: "history",
-        base: "/",
-        routes
+    const router = createRouter({
+        history: createWebHistory("/"),
+        routes,
     });
+
     return router;
 }

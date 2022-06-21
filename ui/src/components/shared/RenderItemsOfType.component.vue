@@ -32,7 +32,7 @@
     />
 */
 import RenderItemByIdComponent from "./RenderItemById.component.vue";
-import { ROCrate } from "ro-crate";
+// import { ROCrate } from "ro-crate";
 import { isArray } from "lodash";
 
 export default {
@@ -89,15 +89,15 @@ export default {
     },
     methods: {
         loadItems() {
-            const crate = new ROCrate(this.crate);
-            crate.index();
-            let items = crate._item_by_type[this.type].map((i) => {
-                this.resolve.forEach((property) => {
-                    i[property] = crate.resolve([i], [{ property }]);
-                });
-                return i;
-            });
-            return items;
+            // const crate = new ROCrate(this.crate);
+            // crate.index();
+            // let items = crate._item_by_type[this.type].map((i) => {
+            //     this.resolve.forEach((property) => {
+            //         i[property] = crate.resolve([i], [{ property }]);
+            //     });
+            //     return i;
+            // });
+            // return items;
         },
     },
 };

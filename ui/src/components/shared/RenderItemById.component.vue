@@ -25,7 +25,7 @@
     />
 */
 
-import { ROCrate } from "ro-crate";
+// import { ROCrate } from "ro-crate";
 import { isArray, isString, isPlainObject } from "lodash";
 
 export default {
@@ -78,17 +78,17 @@ export default {
     },
     methods: {
         loadItem() {
-            const crate = new ROCrate(this.crate);
-            crate.index();
-            let item = crate.getItem(this.id);
-            if (this.layout.length) {
-                if (this.resolve.length) {
-                    this.resolve.forEach((property) => {
-                        item[property] = crate.resolve([item], [{ property }]);
-                    });
-                }
-            }
-            return item;
+            // const crate = new ROCrate(this.crate);
+            // crate.index();
+            // let item = crate.getItem(this.id);
+            // if (this.layout.length) {
+            //     if (this.resolve.length) {
+            //         this.resolve.forEach((property) => {
+            //             item[property] = crate.resolve([item], [{ property }]);
+            //         });
+            //     }
+            // }
+            // return item;
         },
         renderInformation(item) {
             let info = [];

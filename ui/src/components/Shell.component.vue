@@ -5,14 +5,14 @@
 </template>
 
 <script>
-import { DataLoader } from "src/services/data-loader.service";
+// import { DataLoader } from "src/services/data-loader.service";
 
 export default {
     components: {},
     data() {
         return {
-            watchers: {}
+            watchers: {},
         };
-    }
+    },
 };
 </script>
