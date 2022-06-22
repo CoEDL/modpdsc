@@ -12,7 +12,7 @@ import SupportComponent from "components/support/Shell.component.vue";
 
 export function router({ configuration }) {
     let routes = [
-        { path: "*", name: "404", component: BadRequestComponent },
+        { path: "/:pathMatch(.*)", name: "404", component: BadRequestComponent },
         {
             name: "HealthCheck",
             path: "/health-check",
