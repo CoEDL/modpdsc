@@ -4,10 +4,13 @@
     </div>
 </template>
 
-<script>
-export default {
-    data() {
-        return {};
-    },
-};
+<script setup>
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+onMounted(() => {
+    router.push("/dashboard");
+});
 </script>
