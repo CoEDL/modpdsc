@@ -1,4 +1,4 @@
-version: "2"
+version: "3.3"
 
 volumes:
     ui-modules:
@@ -6,6 +6,47 @@ volumes:
     search:
 
 services:
+    db:
+        image: postgres:13-alpine
+        hostname: db
+        tty: true
+        environment:
+            TERM: "xterm-256color"
+            NODE_ENV: "development"
+            POSTGRES_DB: "nyingarn"
+            POSTGRES_USER: "root"
+            POSTGRES_PASSWORD: ""
+            POSTGRES_HOST_AUTH_METHOD: "trust"
+            PGDATA: /postgresql/data
+        # volumes:
+        #     - describo_online_db_test:/postgresql
+        #ports:
+        #    - 5432:5432
+    api:
+        image: node:14-buster
+        hostname: api
+        tty: true
+        environment:
+            TERM: "xterm-256color"
+            NODE_ENV: "development"
+            LOG_LEVEL: "debug"
+            DB_HOST: "db"
+            DB_PORT: "5432"
+            DB_USER: "root"
+            DB_PASSWORD: ""
+            DB_DATABASE: "nyingarn"
+        volumes:
+            - api-modules:/srv/api/node_modules:delegated
+            - ./api:/srv/api:delegated
+            - ./.git:/srv/api/.git:delegated
+            - ./scripts/wait-for-it.sh:/wait-for-it.sh
+            - ./configuration:/srv/configuration
+        working_dir: /srv/api
+        command: ["/wait-for-it.sh", "db:5432", "--", "npm", "run", "develop"]
+        ports:
+            - 8080:8080
+
+
     ui:
         image: node:14-buster
         hostname: ui
@@ -22,32 +63,32 @@ services:
         ports:
             - 9001:9001
 
-    search:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
-        hostname: search
-        environment:
-            - node.name=search
-            - discovery.seed_hosts=search
-            - bootstrap.memory_lock=true
-            - http.host=0.0.0.0
-            - "ES_JAVA_OPTS=-Xms4096m -Xmx4096m"
-        ulimits:
-            memlock:
-                soft: -1
-                hard: -1
-            nofile:
-                soft: 65536
-                hard: 65536
-        cap_add:
-            - IPC_LOCK
-        volumes:
-            - search:/usr/share/elasticsearch/data:delegated
-            - $PWD/elastic/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-            - $PWD/elastic/roles.yml:/usr/share/elasticsearch/config/roles.yml
-            - $PWD/elastic/users:/usr/share/elasticsearch/config/users
-            - $PWD/elastic/users_roles:/usr/share/elasticsearch/config/users_roles
-        ports:
-            - 9200:9200
+    # search:
+    #     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
+    #     hostname: search
+    #     environment:
+    #         - node.name=search
+    #         - discovery.seed_hosts=search
+    #         - bootstrap.memory_lock=true
+    #         - http.host=0.0.0.0
+    #         - "ES_JAVA_OPTS=-Xms4096m -Xmx4096m"
+    #     ulimits:
+    #         memlock:
+    #             soft: -1
+    #             hard: -1
+    #         nofile:
+    #             soft: 65536
+    #             hard: 65536
+    #     cap_add:
+    #         - IPC_LOCK
+    #     volumes:
+    #         - search:/usr/share/elasticsearch/data:delegated
+    #         - $PWD/elastic/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    #         - $PWD/elastic/roles.yml:/usr/share/elasticsearch/config/roles.yml
+    #         - $PWD/elastic/users:/usr/share/elasticsearch/config/users
+    #         - $PWD/elastic/users_roles:/usr/share/elasticsearch/config/users_roles
+    #     ports:
+    #         - 9200:9200
     # db:
     #     image: postgres:11-alpine
     #     hostname: db
