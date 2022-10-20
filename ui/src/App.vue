@@ -1,16 +1,7 @@
 <template>
-    <div id="app" class="flex flex-col h-screen">
+    <div class="w-screen h-screen bg-red-200">
         <router-view />
     </div>
 </template>
 
-<script setup>
-import { onMounted } from "vue";
-import { useRouter } from "vue-router";
-
-const router = useRouter();
-
-onMounted(() => {
-    router.push("/dashboard");
-});
-</script>
+<script setup></script>
