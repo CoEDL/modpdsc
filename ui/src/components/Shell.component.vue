@@ -1,18 +1,8 @@
 <template>
-    <div>
-        <router-view></router-view>
+    <div class="flex flex-col">
+        <div class="h-10">navbar</div>
+        <router-view />
     </div>
 </template>
 
-<script>
-// import { DataLoader } from "src/services/data-loader.service";
-
-export default {
-    components: {},
-    data() {
-        return {
-            watchers: {},
-        };
-    },
-};
-</script>
+<script setup></script>
