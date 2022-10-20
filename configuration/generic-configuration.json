@@ -1,12 +1,51 @@
 {
-    "service": {
-        "search": "/search",
-        "api": null
+    "domain": "catalog.cherokee.org",
+    "ui": {
+        "service": {
+            "search": "/search",
+            "api": null
+        },
+        "imageFormats": ["image/jpg", "image/jpeg"],
+        "audioFormats": ["audio/mpeg"],
+        "videoFormats": ["video/quicktime", "video/mp4"],
+        "documentFileExtensions": [
+            "txt",
+            "rtf",
+            "pdf",
+            "doc",
+            "docx",
+            "xls",
+            "xlsx",
+            "ppt",
+            "pptx"
+        ],
+        "transcriptionFileExtensions": ["eaf", "trs", "ixt", "flextext"],
+        "indexerMetadataNamespace": "ocfl-indexer:meta",
+        "explore": "paradisec.org.au/explore/Shell.component.vue",
+        "introduction": "paradisec.org.au/introduction/Shell.component.vue",
+        "header": "paradisec.org.au/header/Shell.component.vue",
+        "footer": "paradisec.org.au/footer/Shell.component.vue",
+        "renderers": {
+            "paradisec.org.au": [
+                {
+                    "type": "item",
+                    "component": "paradisec.org.au/renderers/ItemViewer.component.vue"
+                },
+                {
+                    "type": "collection",
+                    "component": "paradisec.org.au/renderers/CollectionViewer.component.vue"
+                }
+            ]
+        }
     },
-    "imageFormats": ["image/jpg", "image/jpeg"],
-    "audioFormats": ["audio/mpeg"],
-    "videoFormats": ["video/quicktime", "video/mp4"],
-    "documentFileExtensions": ["txt", "rtf", "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"],
-    "transcriptionFileExtensions": ["eaf", "trs", "ixt", "flextext"],
-    "indexerMetadataNamespace": "ocfl-indexer:meta"
+    "api": {
+        "s3": {
+            "bucket": "cherokee",
+            "forcePathStyle": true,
+            "endpoint": "https://{your minio endpoint}",
+            "accessKeyId": "{key}",
+            "secretAccessKey": "{secret}",
+            "region": "us-east-1"
+        }
+    }
 }
