@@ -9,7 +9,6 @@ const log = getLogger();
     let configuration;
     try {
         configuration = await loadConfiguration();
-        console.logc(configuration);
     } catch (error) {
         log.error("configuration.json not found - stopping now");
         process.exit();

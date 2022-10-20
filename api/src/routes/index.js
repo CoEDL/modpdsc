@@ -1,21 +1,89 @@
 "use strict";
 
 import restifyErrors from "restify-errors";
-const { UnauthorizedError, ForbiddenError } = restifyErrors;
+const { NotFoundError, UnauthorizedError, ForbiddenError } = restifyErrors;
 import { loadConfiguration, route, routeAdmin } from "../common/index.js";
+import { Store } from "@coedl/nocfl-js";
 
 export function setupRoutes({ server }) {
     server.get("/", (req, res, next) => {
         res.send({});
         next();
     });
-    server.get("/configuration", async (req, res, next) => {
-        let configuration = await loadConfiguration();
-        // configuration = filterPrivateInformation({ configuration });
-        console.log(configuration);
-        res.send({
-            ui: configuration.ui,
-        });
-        next();
+    server.get("/configuration", getConfigurationHandler);
+    server.get("/collections/:collectionId/metadata", getCollectionMetadataHandler);
+    server.get("/collections/:collectionId/items/:itemId/metadata", getItemMetadataHandler);
+    server.get("/items/:itemId/metadata", getItemMetadataHandler);
+    // server.get("/item/:identifier", async (req, res, next) => {
+    //     let configuration = await loadConfiguration();
+    //     let store = new Store({
+    //         domain: configuration.domain,
+    //         className: "item",
+    //         id: req.params.identifier,
+    //         credentials: configuration.api.s3,
+    //     });
+    //     // console.log(store);
+    //     let crateFile = await store.get({ target: "ro-crate-metadata.json" });
+    //     res.send({ roCrate: JSON.parse(crateFile) });
+    //     next();
+    // });
+    // server.get("/item/:identifier/presigned-url", async (req, res, next) => {
+    //     let configuration = await loadConfiguration();
+    //     let store = new Store({
+    //         domain: configuration.domain,
+    //         className: "item",
+    //         id: req.params.identifier,
+    //         credentials: configuration.api.s3,
+    //     });
+    //     let url = await store.getPresignedUrl({ target: req.query.filename });
+    //     console.log(url);
+    //     res.send({ url });
+    //     next();
+    // });
+}
+
+async function getConfigurationHandler(req, res, next) {
+    let configuration = await loadConfiguration();
+    res.send({
+        ui: configuration.ui,
     });
+    next();
+}
+
+async function getCollectionMetadataHandler(req, res, next) {
+    let configuration = await loadConfiguration();
+    let store = new Store({
+        domain: configuration.domain,
+        className: "collection",
+        id: req.params.collectionId,
+        credentials: configuration.api.s3,
+    });
+
+    const exists = await store.itemExists();
+    if (!exists) {
+        res.send({});
+        return next(new NotFoundError());
+    }
+    let crate = await store.getJSON({ target: "ro-crate-metadata.json" });
+    res.send({ crate });
+    next();
+}
+
+async function getItemMetadataHandler(req, res, next) {
+    let configuration = await loadConfiguration();
+    let store = new Store({
+        domain: configuration.domain,
+        className: "item",
+        id: req.params.itemId,
+        credentials: configuration.api.s3,
+    });
+
+    const exists = await store.itemExists();
+    if (!exists) {
+        res.send({});
+        return next(new NotFoundError());
+    }
+    let crate = await store.getJSON({ target: "ro-crate-metadata.json" });
+    res.send({ crate });
+    next();
 }
