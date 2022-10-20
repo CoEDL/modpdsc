@@ -12,11 +12,8 @@ const configuration = merge(common, {
         },
         compress: true,
         host: "0.0.0.0",
-        port: 9000,
+        port: 9001,
         historyApiFallback: true,
-        devMiddleware: {
-            writeToDisk: true,
-        },
         hot: true,
     },
     plugins: [
