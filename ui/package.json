@@ -18,7 +18,7 @@
     "dependencies": {
         "@coedl/elastic-query-builder": "^0.3.0",
         "@coedl/transcription-parsers": "^1.3.6",
-        "@describo/crate-builder-component": "^0.14.0",
+        "@describo/crate-builder-component": "^0.15.3",
         "@tailwindcss/typography": "^0.5.7",
         "date-fns": "^2.29.3",
         "element-plus": "^2.2.18",
