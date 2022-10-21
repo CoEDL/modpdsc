@@ -1,12 +1,12 @@
 import "regenerator-runtime";
 import "assets/tailwind.css";
-// import "assets/global-styles.scss";
+import "assets/global-styles.scss";
 import "element-plus/theme-chalk/index.css";
 import "@fortawesome/fontawesome-free/js/all";
 import { config } from "@fortawesome/fontawesome-svg-core";
 config.autoReplaceSvg = "nest";
 
-import { createApp } from "vue";
+import { createApp, provide } from "vue";
 import DescriboCrateBuilder from "@describo/crate-builder-component";
 import App from "./App.vue";
 import { router } from "./routes.js";
@@ -36,6 +36,10 @@ import HTTPService from "./http.service";
         app.provide("$http", app.config.globalProperties.$http);
         app.config.globalProperties.$log = log;
         app.provide("$log", app.config.globalProperties.$log);
+
+        app.provide("configuration", {
+            mode: configuration.mode ? configuration.mode.toLowerCase() : "default",
+        });
         app.mount("#app");
     }
 })();
