@@ -1,8 +1,10 @@
 <template>
     <div class="flex flex-col">
-        <div class="h-10">navbar</div>
+        <navbar-component class="bg-sky-100" />
         <router-view />
     </div>
 </template>
 
-<script setup></script>
+<script setup>
+import NavbarComponent from "./Navbar.component.vue";
+</script>
