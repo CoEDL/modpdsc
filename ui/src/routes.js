@@ -13,6 +13,11 @@ export function router({ configuration }) {
             component: ShellComponent,
             children: [
                 {
+                    path: "dashboard",
+                    component: DashboardComponent,
+                    props: true,
+                },
+                {
                     path: "collections/:collectionId",
                     component: ViewComponent,
                     props: true,
