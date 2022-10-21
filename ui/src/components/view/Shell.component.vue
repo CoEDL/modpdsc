@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col">
+    <div class="px-2">
         <el-tabs type="border-card" tab-position="top" v-model="data.activeTab">
             <el-tab-pane label="Metadata" name="metadata">
                 <span v-if="data.ready">
