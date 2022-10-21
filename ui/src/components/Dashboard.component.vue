@@ -1,27 +1,12 @@
 <template>
-    <div>
-        <!-- <introduction-component /> -->
-        <!-- <explore-component />
-        <header-component />
-        <footer-component /> -->
+    <div class="flex flex-row p-4">
+        <introduction-component class="w-1/2 border-violet-200 border-2 rounded m-2 p-4" />
+        <item-jumper-component class="w-1/2 bg-white border-violet-200 border-2 rounded m-2 p-4" />
     </div>
 </template>
 
 <script setup>
-import { defineAsyncComponent } from "vue";
+import ItemJumperComponent from "./ItemJumper.component.vue";
+import IntroductionComponent from "./introduction/Shell.component.vue";
 import { useStore } from "vuex";
-const store = useStore();
-
-const IntroductionComponent = defineAsyncComponent(() =>
-    import(`./domain/${store.state.configuration.ui.introduction}`)
-);
-// const ExploreComponent = defineAsyncComponent(() =>
-//     import(`./domain/${store.state.configuration.ui.explore}`)
-// );
-// const HeaderComponent = defineAsyncComponent(() =>
-//     import(`./domain/${store.state.configuration.ui.header}`)
-// );
-// const FooterComponent = defineAsyncComponent(() =>
-//     import(`./domain/${store.state.configuration.ui.footer}`)
-// );
 </script>
