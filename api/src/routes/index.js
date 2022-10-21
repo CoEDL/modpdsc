@@ -61,7 +61,6 @@ async function getCollectionMetadataHandler(req, res, next) {
 
     const exists = await store.itemExists();
     if (!exists) {
-        res.send({});
         return next(new NotFoundError());
     }
     let crate = await store.getJSON({ target: "ro-crate-metadata.json" });
@@ -80,7 +79,6 @@ async function getItemMetadataHandler(req, res, next) {
 
     const exists = await store.itemExists();
     if (!exists) {
-        res.send({});
         return next(new NotFoundError());
     }
     let crate = await store.getJSON({ target: "ro-crate-metadata.json" });
