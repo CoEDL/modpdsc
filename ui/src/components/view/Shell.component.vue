@@ -1,11 +1,23 @@
 <template>
     <div class="flex flex-col">
-        <div><el-button @click="init">init</el-button></div>
+        <el-tabs type="border-card" tab-position="top" v-model="data.activeTab">
+            <el-tab-pane label="Metadata" name="metadata">
+                <span v-if="data.ready">
+                    <describo-crate-builder
+                        :crate="data.crate"
+                        :profile="data.profile"
+                        :readonly="true"
+                    />
+                </span>
+                <span v-if="data.error" class="bg-red-200 text-center p-2 font-light">
+                    The metadata for that item is not able to be loaded.
+                </span>
+            </el-tab-pane>
+        </el-tabs>
     </div>
 </template>
 
 <script setup>
-import ItemViewerComponent from "@/components/domain/paradisec.org.au/renderers/ItemViewer.component.vue";
 import { useRoute } from "vue-router";
 import { inject, onMounted, reactive } from "vue";
 import { useStore } from "vuex";
@@ -14,36 +26,52 @@ const $route = useRoute();
 const $http = inject("$http");
 
 let data = reactive({
+    activeTab: "metadata",
     ready: false,
-    metadata: {},
+    error: false,
     crate: {},
+    profile: {
+        layouts: {
+            Dataset: [
+                {
+                    name: "About",
+                    description: "Key information about this item",
+                    inputs: ["identifier", "description", "contentLanguage", "subjectLanguage"],
+                },
+                {
+                    name: "Files",
+                    description: "Files forming part of this item",
+                    inputs: ["hasPart"],
+                },
+            ],
+        },
+    },
 });
 
 onMounted(() => {
     init();
 });
 async function init() {
+    let response;
+
+    data.ready = false;
+    data.error = false;
     const { collectionId, itemId } = $route.params;
     if (collectionId && !itemId) {
-        let response = await $http.get({ route: `/collections/${collectionId}/metadata` });
-        if (response.status === 200) {
-            let { crate } = await response.json();
-            data.crate = { ...crate };
-        }
+        response = await $http.get({ route: `/collections/${collectionId}/metadata` });
     } else if (collectionId && itemId) {
-        let response = await $http.get({
+        response = await $http.get({
             route: `/collections/${collectionId}/items/${itemId}/metadata`,
         });
-        if (response.status === 200) {
-            let { crate } = await response.json();
-            data.crate = { ...crate };
-        }
     } else if (itemId && !collectionId) {
-        let response = await $http.get({ route: `/items/${itemId}/metadata` });
-        if (response.status === 200) {
-            let { crate } = await response.json();
-            data.crate = { ...crate };
-        }
+        response = await $http.get({ route: `/items/${itemId}/metadata` });
+    }
+    if (response.status === 200) {
+        let { crate } = await response.json();
+        data.crate = { ...crate };
+        data.ready = true;
+    } else {
+        data.error = true;
     }
 }
 </script>
