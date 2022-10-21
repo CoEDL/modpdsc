@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col">
         <navbar-component class="bg-sky-100" />
-        <router-view />
+        <router-view class="mt-2" />
     </div>
 </template>
 
