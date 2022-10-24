@@ -1,8 +1,8 @@
 <template>
     <div class="flex flex-col bg-indigo-100 rounded p-4" v-if="images.length">
-        <div class="flex flex-col md:flex-row  md:space-x-2 my-2">
+        <div class="flex flex-col md:flex-row md:space-x-2 my-2">
             <div>{{ selectedName }}</div>
-            <copy-to-clipboard-component :data="itemLink" />
+            <!-- <copy-to-clipboard-component :data="itemLink" /> -->
             <div class="flex-grow"></div>
             <el-pagination
                 :background="true"
@@ -18,24 +18,24 @@
         </div>
         <div class="mt-4">
             <div>
-                <img :src="images[current].path" />
+                <img :src="images[current - 1].url" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { getFilesByEncoding } from "../lib";
+import { getFilesByEncoding, getPresignedUrl } from "../lib";
 import { orderBy, compact, cloneDeep } from "lodash";
 const { FullScreenViewer } = require("iv-viewer");
-import CopyToClipboardComponent from "src/components/shared/CopyToClipboard.component.vue";
+import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
 
 export default {
     components: {
         CopyToClipboardComponent,
     },
     props: {
-        data: {
+        crate: {
             type: Object,
             required: true,
         },
@@ -53,27 +53,44 @@ export default {
         this.init();
     },
     methods: {
-        init() {
+        async init() {
             let images = getFilesByEncoding({
-                rocrate: this.data.rocrate,
-                formats: this.$store.state.configuration.imageFormats,
+                crate: this.crate,
+                formats: this.$store.state.configuration.ui.imageFormats,
             });
-            const datafiles = cloneDeep(this.data.datafiles);
-            images = images.map((image) => {
-                if (!datafiles[image.name]) return undefined;
-                return {
+            for (let image of images) {
+                let url = await getPresignedUrl({
+                    $http: this.$http,
+                    identifier: this.$route.params.identifier,
+                    filename: image["@id"],
+                });
+                this.images.push({
                     ...image,
-                    path: datafiles[image.name].pop().path,
-                };
-            });
-            images = compact(images);
-            this.images = orderBy(images, "name");
-            this.totalImages = images.length;
+                    url,
+                });
+            }
+            this.images = orderBy(this.images, "name");
+            this.totalImages = this.images.length;
             if (this.$route.hash && this.$route.query?.type === "image") {
                 let images = this.images.map((d) => d.name);
                 this.current = images.indexOf(this.$route.hash.replace("#", "")) + 1;
             }
             this.update(this.current);
+
+            // console.log(JSON.stringify(images, null, 2));
+            // const datafiles = cloneDeep(this.data.datafiles);
+            // images = images.map((image) => {
+            //     return {
+            //         ...image,
+            //     };
+            // });
+            // images = compact(images);
+            // this.images = orderBy(images, "name");
+            // if (this.$route.hash && this.$route.query?.type === "image") {
+            //     let images = this.images.map((d) => d.name);
+            //     this.current = images.indexOf(this.$route.hash.replace("#", "")) + 1;
+            // }
+            // this.update(this.current);
         },
         update(number) {
             this.current = number;

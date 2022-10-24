@@ -24,7 +24,7 @@
 import { getFilesByEncoding } from "../lib";
 import { cloneDeep, compact } from "lodash";
 import { DataLoader } from "src/services/data-loader.service";
-import CopyToClipboardComponent from "src/components/shared/CopyToClipboard.component.vue";
+import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
 
 const dataLoader = new DataLoader();
 import Prism from "prismjs";

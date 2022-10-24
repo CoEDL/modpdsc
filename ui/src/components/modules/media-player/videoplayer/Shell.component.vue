@@ -13,10 +13,10 @@
                 @current-change="update"
             ></el-pagination>
         </div>
-        <render-audio-element-component
+        <render-video-element-component
             v-if="selectedName"
-            class=""
-            :items="audio[selectedName]"
+            class="bg-indigo-100 rounded my-4"
+            :items="video[selectedName]"
             :name="selectedName"
             :transcriptions="transcriptions[selectedName]"
         />
@@ -26,12 +26,12 @@
 <script>
 import { getFilesByEncoding, getFilesByName } from "../lib";
 import { cloneDeep, compact, orderBy, groupBy } from "lodash";
-import RenderAudioElementComponent from "./RenderAudioElement.component.vue";
-import CopyToClipboardComponent from "src/components/shared/CopyToClipboard.component.vue";
+import RenderVideoElementComponent from "./RenderVideoElement.component.vue";
+import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
 
 export default {
     components: {
-        RenderAudioElementComponent,
+        RenderVideoElementComponent,
         CopyToClipboardComponent,
     },
     props: {
@@ -42,7 +42,7 @@ export default {
     },
     data() {
         return {
-            audio: {},
+            video: {},
             transcriptions: {},
             current: 1,
             total: undefined,
@@ -55,27 +55,27 @@ export default {
     },
     methods: {
         init() {
-            let audio = getFilesByEncoding({
+            let video = getFilesByEncoding({
                 rocrate: this.data.rocrate,
-                formats: this.$store.state.configuration.audioFormats,
+                formats: this.$store.state.configuration.videoFormats,
             });
 
             const datafiles = cloneDeep(this.data.datafiles);
-            audio = audio.map((v) => {
+            video = video.map((v) => {
                 if (!datafiles[v.name]) return undefined;
                 return {
                     ...v,
                     path: datafiles[v.name].pop().path,
                 };
             });
-            audio = compact(audio);
-            audio = orderBy(audio, "name");
+            video = compact(video);
+            video = orderBy(video, "name");
 
             if (this.$route.query.transcription) {
                 const transcription = this.$route.query.transcription.split(".").shift();
-                audio = audio.filter((v) => v.name.split(".").shift() === transcription);
+                video = video.filter((v) => v.name.split(".").shift() === transcription);
             }
-            audio = groupBy(audio, (a) => a.name.split(".").shift());
+            video = groupBy(video, (v) => v.name.split(".").shift());
 
             let transcriptions = getFilesByName({
                 rocrate: this.data.rocrate,
@@ -95,15 +95,15 @@ export default {
             }
             transcriptions = groupBy(transcriptions, (t) => t.name.split(".").shift());
 
-            // console.log(JSON.stringify(audio, null, 2));
+            // console.log(JSON.stringify(video, null, 2));
             // console.log(JSON.stringify(transcriptions, null, 2));
 
-            this.audio = audio;
+            this.video = video;
             this.transcriptions = transcriptions;
-            this.total = Object.keys(audio).length;
-            if (this.$route.hash && this.$route.query?.type === "audio") {
+            this.total = Object.keys(this.video).length;
+            if (this.$route.hash && this.$route.query?.type === "video") {
                 this.current =
-                    Object.keys(this.audio).indexOf(this.$route.hash.replace("#", "")) + 1;
+                    Object.keys(this.video).indexOf(this.$route.hash.replace("#", "")) + 1;
             }
             this.setSelectedFile();
         },
@@ -115,8 +115,8 @@ export default {
             });
         },
         setSelectedFile() {
-            this.selectedName = Object.keys(this.audio)[this.current - 1];
-            this.$emit("update-route", { hash: this.selectedName, type: "audio" });
+            this.selectedName = Object.keys(this.video)[this.current - 1];
+            this.$emit("update-route", { hash: this.selectedName, type: "video" });
             this.$nextTick(() => {
                 this.itemLink = window.location;
             });

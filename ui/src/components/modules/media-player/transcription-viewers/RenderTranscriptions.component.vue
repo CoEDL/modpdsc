@@ -9,8 +9,8 @@
             ></component>
 
             <div v-if="error" class="text-center">
-                There was an error loading that file. This is typically due to
-                the XML not being well-formed.
+                There was an error loading that file. This is typically due to the XML not being
+                well-formed.
             </div>
         </div>
     </div>
@@ -33,11 +33,11 @@ export default {
     },
     props: {
         transcriptions: {
-            type: Array | undefined,
+            type: Array,
             required: true,
         },
         selectedTranscription: {
-            type: Object | undefined,
+            type: Object,
             required: true,
         },
         currentTime: {
@@ -79,7 +79,7 @@ export default {
                 }
                 this.transcription = {
                     ...transcription,
-                    displayName: (transcription.displayName = transcription.name
+                    displayName: (transcription.displayName = transcription["@id"]
                         .split(".")
                         .slice(0, -1)
                         .join(".")),
@@ -88,16 +88,13 @@ export default {
 
                 switch (this.transcription.type) {
                     case "ixt":
-                        this.transcriptionRendererComponent =
-                            "RenderTranscriptionIxtComponent";
+                        this.transcriptionRendererComponent = "RenderTranscriptionIxtComponent";
                         break;
                     case "trs":
-                        this.transcriptionRendererComponent =
-                            "RenderTranscriptionTrsComponent";
+                        this.transcriptionRendererComponent = "RenderTranscriptionTrsComponent";
                         break;
                     case "eaf":
-                        this.transcriptionRendererComponent =
-                            "RenderTranscriptionEafComponent";
+                        this.transcriptionRendererComponent = "RenderTranscriptionEafComponent";
                         break;
                     case "flextext":
                         this.transcriptionRendererComponent =

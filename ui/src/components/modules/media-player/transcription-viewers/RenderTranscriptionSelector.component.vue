@@ -9,8 +9,8 @@
             <el-radio
                 v-for="(transcription, idx) of transcriptions"
                 :key="idx"
-                :label="transcription"
-                >{{ transcription.name }}</el-radio
+                :label="transcription['@id']"
+                >{{ transcription["@id"] }}</el-radio
             >
         </el-radio-group>
     </div>
@@ -24,22 +24,22 @@ export default {
     props: {
         transcriptions: {
             type: Array,
-            required: true
+            required: true,
         },
         layout: {
-            type: String
-        }
+            type: String,
+        },
     },
     data() {
         return {
-            selectedTranscription: this.transcriptions[0]
+            selectedTranscription: this.transcriptions[0],
         };
     },
     methods: {
         loadTranscription(transcription) {
             this.$emit("load-transcription", transcription);
-        }
-    }
+        },
+    },
 };
 </script>
 

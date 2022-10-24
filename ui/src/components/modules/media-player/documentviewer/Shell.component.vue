@@ -28,7 +28,7 @@
 <script>
 import { getFilesByName } from "../lib";
 import { cloneDeep, compact } from "lodash";
-import CopyToClipboardComponent from "src/components/shared/CopyToClipboard.component.vue";
+import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
 
 export default {
     components: {
