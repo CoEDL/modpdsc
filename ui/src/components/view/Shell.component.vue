@@ -14,22 +14,32 @@
                     The metadata for that item is not able to be loaded.
                 </div>
             </el-tab-pane>
+            <el-tab-pane
+                label="Content"
+                name="content"
+                v-if="!data.loading && data.type === 'item'"
+            >
+                <render-content-component :crate="data.crate" />
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>
 
 <script setup>
+import RenderContentComponent from "./RenderContent.component.vue";
 import { useRoute } from "vue-router";
 import { inject, onMounted, reactive } from "vue";
 import { useStore } from "vuex";
 const $store = useStore();
 const $route = useRoute();
 const $http = inject("$http");
+const $http = inject("$http");
 
 let data = reactive({
-    activeTab: "metadata",
+    activeTab: "content",
     loading: false,
     error: false,
+    type: undefined,
     crate: {},
     profile: {
         layouts: {
@@ -61,12 +71,15 @@ async function init() {
     const { collectionId, itemId } = $route.params;
     if (collectionId && !itemId) {
         response = await $http.get({ route: `/collections/${collectionId}/metadata` });
+        data.type = "collection";
     } else if (collectionId && itemId) {
         response = await $http.get({
             route: `/collections/${collectionId}/items/${itemId}/metadata`,
         });
+        data.type = "item";
     } else if (itemId && !collectionId) {
         response = await $http.get({ route: `/items/${itemId}/metadata` });
+        data.type = "item";
     }
     if (response.status === 200) {
         let { crate } = await response.json();
