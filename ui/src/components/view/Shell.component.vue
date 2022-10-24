@@ -2,16 +2,17 @@
     <div class="px-2">
         <el-tabs type="border-card" tab-position="top" v-model="data.activeTab">
             <el-tab-pane label="Metadata" name="metadata">
-                <span v-if="data.ready">
-                    <describo-crate-builder
-                        :crate="data.crate"
-                        :profile="data.profile"
-                        :readonly="true"
-                    />
-                </span>
-                <span v-if="data.error" class="bg-red-200 text-center p-2 font-light">
+                <describo-crate-builder
+                    v-if="!data.error"
+                    v-loading="data.loading && !data.error"
+                    :crate="data.crate"
+                    :profile="data.profile"
+                    :readonly="true"
+                    @ready="ready"
+                />
+                <div v-if="data.error" class="bg-red-200 text-center p-2 font-light">
                     The metadata for that item is not able to be loaded.
-                </span>
+                </div>
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -27,7 +28,7 @@ const $http = inject("$http");
 
 let data = reactive({
     activeTab: "metadata",
-    ready: false,
+    loading: false,
     error: false,
     crate: {},
     profile: {
@@ -46,6 +47,7 @@ let data = reactive({
             ],
         },
     },
+    // profile: {},
 });
 
 onMounted(() => {
@@ -54,7 +56,7 @@ onMounted(() => {
 async function init() {
     let response;
 
-    data.ready = false;
+    data.loading = true;
     data.error = false;
     const { collectionId, itemId } = $route.params;
     if (collectionId && !itemId) {
@@ -69,9 +71,14 @@ async function init() {
     if (response.status === 200) {
         let { crate } = await response.json();
         data.crate = { ...crate };
-        data.ready = true;
+        data.loading = false;
     } else {
+        data.loading = false;
         data.error = true;
     }
+}
+
+function ready() {
+    data.loading = false;
 }
 </script>
