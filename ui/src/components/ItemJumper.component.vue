@@ -44,7 +44,8 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 const $router = useRouter();
 const $store = useStore();
-const configuration = { ...$store.state.configuration };
+
+const configuration = $store.getters.getConfiguration;
 
 const data = reactive({
     collectionId: undefined,

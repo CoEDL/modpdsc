@@ -1,6 +1,7 @@
 "use strict";
 
 import { createStore } from "vuex";
+import { cloneDeep } from "lodash";
 
 const mutations = {
     saveConfiguration(state, configuration) {
@@ -16,11 +17,16 @@ const mutations = {
 };
 
 const actions = {};
-const getters = {};
+const getters = {
+    getConfiguration(state) {
+        return cloneDeep(state.configuration);
+    },
+};
 
 export const store = new createStore({
     state: resetState(),
     mutations,
+    getters,
     actions,
     modules: {},
 });
