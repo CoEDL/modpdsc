@@ -1,6 +1,6 @@
 export const loginSessionKey = "nyingarn-login-session-data";
 export const tokenSessionKey = "nyingarn-user-token";
-export const agreementsKey = "nyingarn-access-aggrements";
+export const agreementsKey = "nyingarn-access-agreements";
 
 // local storage handlers
 export function putLocalStorage({ key, data }) {
