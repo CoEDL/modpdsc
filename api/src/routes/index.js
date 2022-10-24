@@ -46,7 +46,8 @@ async function getConfigurationHandler(req, res, next) {
     let configuration = await loadConfiguration();
     res.send({
         domain: configuration.domain,
-        mode: configuration.mode || "default",
+        links: configuration.links.toLowerCase() || "default",
+        deployment: configuration.deployment.toLowerCase() || "default",
         ui: configuration.ui,
     });
     next();
@@ -75,7 +76,7 @@ async function getItemMetadataHandler(req, res, next) {
 
     let identifier;
 
-    if (configuration.mode === "paradisec" && req.params.collectionId && req.params.itemId) {
+    if (configuration.links === "paradisec" && req.params.collectionId && req.params.itemId) {
         identifier = `${req.params.collectionId}_${req.params.itemId}`;
     } else {
         identifier = req.params.itemId;
