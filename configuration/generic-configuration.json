@@ -1,10 +1,46 @@
 {
-    "domain": "catalog.cherokee.org",
+    "domain": "{{you domain}}",
     "ui": {
         "service": {
             "search": "/search",
             "api": null
         },
+        "conditionsOfAccess": [
+            {
+                "text": "Some sentence outlining a condition"
+            },
+            {
+                "text": "Another condition"
+            },
+            {
+                "section": "Purpose",
+                "text": "A condition framed by a section identifier"
+            },
+            {
+                "section": "Acknowledgement",
+                "text": "To acknowledge in any work, published or unpublished, based in whole or in part on analyses of the data, both the original depositors of the data and PARADISEC (by use of the PARADISEC persistent identifier and citation form)."
+            },
+            {
+                "section": "Copyright",
+                "text": "Not to copy the data in whole or in part except insofar as this may be necessary for security purposes or for my own personal use. Not to distribute the data to third parties, nor to publish or reproduce it in any way. Copyright of all machine-readable data issued by PARADISEC is reserved."
+            },
+            {
+                "section": "Access",
+                "text": "To give access to the data only to persons directly associated with me or working under my control and to require of such persons signed undertakings neither to use the data except in connection with my academic or educational purposes, nor to give access to the datas to others; these signed undertakings to be made available to PARADISEC on request. Not to give access to any third party if the conditions of deposit preclude this."
+            },
+            {
+                "section": "Errors",
+                "text": "Not to hold PARADISEC liable for any errors of transcription or marking-up which may be found in the data, but to notify PARADISEC of such errors wherever possible."
+            },
+            {
+                "section": "Revisions",
+                "text": "Where substantial revisions or reformatting of the data is permitted by the conditions of deposit and carried out as a part of my research, to inform PARADISEC, and also the original depositor if this is a condition of deposit, of the nature of such revisions and to deposit any such revised version at PARADISEC subject to the conditions of deposit of the original."
+            },
+            {
+                "section": "Charges",
+                "text": "To pay such charges as PARADISEC may require to cover the cost of supplying the data (not applicable unless an invoice accompanies the data)."
+            }
+        ],
         "imageFormats": ["image/jpg", "image/jpeg"],
         "audioFormats": ["audio/mpeg"],
         "videoFormats": ["video/quicktime", "video/mp4"],
@@ -20,31 +56,15 @@
             "pptx"
         ],
         "transcriptionFileExtensions": ["eaf", "trs", "ixt", "flextext"],
-        "indexerMetadataNamespace": "ocfl-indexer:meta",
-        "explore": "paradisec.org.au/explore/Shell.component.vue",
-        "introduction": "paradisec.org.au/introduction/Shell.component.vue",
-        "header": "paradisec.org.au/header/Shell.component.vue",
-        "footer": "paradisec.org.au/footer/Shell.component.vue",
-        "renderers": {
-            "paradisec.org.au": [
-                {
-                    "type": "item",
-                    "component": "paradisec.org.au/renderers/ItemViewer.component.vue"
-                },
-                {
-                    "type": "collection",
-                    "component": "paradisec.org.au/renderers/CollectionViewer.component.vue"
-                }
-            ]
-        }
+        "indexerMetadataNamespace": "indexer:meta"
     },
     "api": {
         "s3": {
-            "bucket": "cherokee",
+            "bucket": "{{your bucket}}",
             "forcePathStyle": true,
-            "endpoint": "https://{your minio endpoint}",
-            "accessKeyId": "{key}",
-            "secretAccessKey": "{secret}",
+            "endpoint": "https://{{your minio endpoint}}",
+            "accessKeyId": "{{key}}",
+            "secretAccessKey": "{{secret}}",
             "region": "us-east-1"
         }
     }
