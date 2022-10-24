@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col space-y-2 p-6">
-        <div class="flex flex-row space-x-2">
+        <div class="flex flex-row space-x-1">
             <div class="w-32 text-right text-sm mr-2">View Collection:</div>
             <div>/</div>
             <div>
@@ -16,9 +16,10 @@
                 </el-button>
             </div>
         </div>
-        <div class="flex flex-row space-x-2">
+        <div class="flex flex-row space-x-1">
             <div class="w-32 text-right text-sm mr-2">View Item:</div>
-            <div v-if="configuration.mode === 'paradisec'">
+            <div v-if="configuration.mode === 'paradisec'" class="flex flex-row space-x-1">
+                <div>/</div>
                 <el-input v-model="data.collectionId" placeholder="collection id"></el-input>
             </div>
             <div>/</div>
@@ -40,8 +41,10 @@
 <script setup>
 import { reactive, inject } from "vue";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 const $router = useRouter();
-const configuration = inject("configuration");
+const $store = useStore();
+const configuration = { ...$store.state.configuration };
 
 const data = reactive({
     collectionId: undefined,
