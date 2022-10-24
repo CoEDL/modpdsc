@@ -18,7 +18,7 @@
         </div>
         <div class="flex flex-row space-x-1">
             <div class="w-32 text-right text-sm mr-2">View Item:</div>
-            <div v-if="configuration.mode === 'paradisec'" class="flex flex-row space-x-1">
+            <div v-if="configuration.links === 'paradisec'" class="flex flex-row space-x-1">
                 <div>/</div>
                 <el-input v-model="data.collectionId" placeholder="collection id"></el-input>
             </div>
@@ -60,7 +60,7 @@ function viewCollection() {
     $router.push(`/collections/${data.collectionId}`);
 }
 function viewItem() {
-    if (configuration.mode === "paradisec") {
+    if (configuration.links === "paradisec") {
         if (!data.collectionId || !data.itemId) {
             data.message = "Please specify a collection and item identifier.";
             return;
