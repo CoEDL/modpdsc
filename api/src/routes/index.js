@@ -45,6 +45,8 @@ export function setupRoutes({ server }) {
 async function getConfigurationHandler(req, res, next) {
     let configuration = await loadConfiguration();
     res.send({
+        domain: configuration.domain,
+        mode: configuration.mode || "default",
         ui: configuration.ui,
     });
     next();
@@ -70,10 +72,19 @@ async function getCollectionMetadataHandler(req, res, next) {
 
 async function getItemMetadataHandler(req, res, next) {
     let configuration = await loadConfiguration();
+
+    let identifier;
+
+    if (configuration.mode === "paradisec" && req.params.collectionId && req.params.itemId) {
+        identifier = `${req.params.collectionId}_${req.params.itemId}`;
+    } else {
+        identifier = req.params.itemId;
+    }
+
     let store = new Store({
         domain: configuration.domain,
         className: "item",
-        id: req.params.itemId,
+        id: identifier,
         credentials: configuration.api.s3,
     });
 
