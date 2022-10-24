@@ -14,13 +14,13 @@
             >
         </div>
 
-        <!-- <media-player-component :crate="this.crate" v-if="!data.showConditionsOfAccess" /> -->
+        <media-player-component :crate="this.crate" v-if="!data.showConditionsOfAccess" />
     </div>
 </template>
 
 <script setup>
 import ConditionsOfAccessComponent from "./ConditionsOfAccess.component.vue";
-// import MediaPlayerComponent from "components/shared/media-player/Shell.component.vue";
+import MediaPlayerComponent from "@/components/modules/media-player/Shell.component.vue";
 // import { ROCrate } from "ro-crate";
 import { reactive, onMounted } from "vue";
 import { useRoute } from "vue-router";
@@ -72,16 +72,14 @@ function init() {
 function acceptConditions() {
     let agreements = getLocalStorage({ key: agreementsKey });
     if (!agreements) agreements = {};
-    console.log(data.identifier);
     agreements[data.identifier] = new Date().toISOString();
-    console.log(agreementsKey, agreements);
-    putLocalStorage({ key: agreementsKey, data: JSON.stringify(agreements) });
+    putLocalStorage({ key: agreementsKey, data: agreements });
     data.showConditionsOfAccess = false;
 }
 function reviewConditions() {
     let agreements = getLocalStorage({ key: agreementsKey });
     delete agreements[data.identifier];
-    putLocalStorage({ key: agreementsKey, data: JSON.stringify(agreements) });
+    putLocalStorage({ key: agreementsKey, data: agreements });
     data.showConditionsOfAccess = true;
 }
 </script>
