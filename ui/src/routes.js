@@ -26,11 +26,25 @@ export function router({ configuration }) {
                     path: "items/:itemId",
                     component: ViewComponent,
                     props: true,
+                    children: [
+                        {
+                            path: ":contentType/:contentId",
+                            component: ViewComponent,
+                            props: true,
+                        },
+                    ],
                 },
                 {
                     path: "collections/:collectionId/items/:itemId",
                     component: ViewComponent,
                     props: true,
+                    children: [
+                        {
+                            path: ":contentType/:contentId",
+                            component: ViewComponent,
+                            props: true,
+                        },
+                    ],
                 },
             ],
         },
