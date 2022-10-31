@@ -1,13 +1,15 @@
 <template>
     <div>
-        <el-tabs type="border-card" tab-position="top" v-model="data.activeTab">
+        <el-tabs tab-position="left" v-model="data.activeTab">
             <el-tab-pane label="Images" name="image" v-if="data.enable.image">
-                <span slot="label"> <i class="fas fa-images"></i> Images </span>
-                <!-- <image-viewer-component
+                <template #label>
+                    <div class="text-lg py-2"><i class="fas fa-images"></i> Images</div>
+                </template>
+                <image-viewer-component
+                    v-if="data.activeTab === 'image'"
                     :crate="this.crate"
-                    v-if="activeTab === 'image'"
                     @update-route="updateRoute"
-                /> -->
+                />
             </el-tab-pane>
             <!-- <el-tab-pane label="Audio" name="audio" v-if="enable.audio">
                 <span slot="label"> <i class="fas fa-volume-up"></i> Audio </span>
@@ -52,7 +54,7 @@ import AudioPlayerComponent from "./audioplayer/Shell.component.vue";
 import VideoPlayerComponent from "./videoplayer/Shell.component.vue";
 import DocumentViewerComponent from "./documentviewer/Shell.component.vue";
 import XmlViewerComponent from "./xmlviewer/Shell.component.vue";
-import { getFilesByName, getFilesByEncoding, updateRouterLocation } from "./lib";
+import { getFilesByName, getFilesByEncoding } from "./lib";
 import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
 const $store = useStore();
@@ -120,11 +122,18 @@ function setActiveTab() {
     data.activeTab = "image";
 }
 function updateRoute(params) {
-    data.itemLink = updateRouterLocation({
-        router: $router,
-        route: $route,
-        hash: params.hash,
-        type: params.type,
-    });
+    const { collectionId, itemId } = $route.params;
+    let basePath;
+    if (collectionId && !itemId) {
+        basePath = `/collections/${collectionId}`;
+    } else if (collectionId && itemId) {
+        basePath = `/collections/${collectionId}/items/${itemId}`;
+    } else if (itemId && !collectionId) {
+        basePath = `/items/${itemId}`;
+    }
+
+    let { contentType, contentId } = params;
+    contentId = contentId.split(".")[0];
+    $router.push({ path: `${basePath}/${contentType}/${contentId}` });
 }
 </script>
