@@ -110,7 +110,9 @@ function updateRoute({ tab }) {
     const { collectionId, itemId } = $route.params;
     if (tab === "metadata") {
         if (collectionId && !itemId) {
+            $router.push({ path: `/collections/${collectionId}` });
         } else if (collectionId && itemId) {
+            $router.push({ path: `/collections/${collectionId}/items/${itemId}` });
         } else if (itemId && !collectionId) {
             $router.push({ path: `/items/${itemId}` });
         }
