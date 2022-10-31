@@ -6,10 +6,10 @@
             class="p-8 bg-yellow-200 text-gray-700"
         />
 
-        <div class="bg-green-200 p-8 text-center" v-if="!data.showConditionsOfAccess">
+        <div class="bg-green-200 p-2 text-center font-light" v-if="!data.showConditionsOfAccess">
             You have agreed to the conditions of access for viewing the content of this item. To
             review the conditions
-            <a class="cursor-pointer text-yellow-600" href.prevent="" @click="reviewConditions"
+            <a class="cursor-pointer text-blue-600" href.prevent="" @click="reviewConditions"
                 >click here.</a
             >
         </div>
