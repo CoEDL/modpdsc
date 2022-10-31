@@ -1,25 +1,30 @@
 <template>
     <div class="px-2">
-        <el-tabs type="border-card" tab-position="top" v-model="data.activeTab">
+        <el-tabs
+            type="border-card"
+            tab-position="top"
+            v-model="data.activeTab"
+            @tab-click="handleTabChange"
+        >
             <el-tab-pane label="Metadata" name="metadata">
-                <describo-crate-builder
-                    v-if="!data.error"
-                    v-loading="data.loading && !data.error"
-                    :crate="data.crate"
-                    :profile="data.profile"
-                    :readonly="true"
-                    @ready="ready"
-                />
-                <div v-if="data.error" class="bg-red-200 text-center p-2 font-light">
-                    The metadata for that item is not able to be loaded.
+                <div v-if="data.activeTab === 'metadata'" v-loading="data.loading">
+                    <describo-crate-builder
+                        v-if="!data.error && !data.loading"
+                        :crate="data.crate"
+                        :profile="data.profile"
+                        :readonly="true"
+                        @ready="ready"
+                    />
+                    <div v-if="data.error" class="bg-red-200 text-center p-2 font-light">
+                        The metadata for that item is not able to be loaded.
+                    </div>
                 </div>
             </el-tab-pane>
-            <el-tab-pane
-                label="Content"
-                name="content"
-                v-if="!data.loading && data.type === 'item'"
-            >
-                <render-content-component :crate="data.crate" />
+            <el-tab-pane label="Content" name="content" v-if="data.type === 'item'">
+                <render-content-component
+                    :crate="data.crate"
+                    v-if="data.activeTab === 'content' && !data.loading"
+                />
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -27,16 +32,14 @@
 
 <script setup>
 import RenderContentComponent from "./RenderContent.component.vue";
-import { useRoute } from "vue-router";
-import { inject, onMounted, reactive } from "vue";
-import { useStore } from "vuex";
-const $store = useStore();
+import { useRoute, useRouter } from "vue-router";
+import { inject, onMounted, onBeforeMount, reactive, nextTick } from "vue";
 const $route = useRoute();
-const $http = inject("$http");
+const $router = useRouter();
 const $http = inject("$http");
 
 let data = reactive({
-    activeTab: "content",
+    activeTab: "metadata",
     loading: false,
     error: false,
     type: undefined,
@@ -60,6 +63,11 @@ let data = reactive({
     // profile: {},
 });
 
+onBeforeMount(() => {
+    const { contentType, contentId } = $route.params;
+    if (contentType && contentId) data.activeTab = "content";
+    updateRoute({ tab: data.activeTab });
+});
 onMounted(() => {
     init();
 });
@@ -88,6 +96,26 @@ async function init() {
     } else {
         data.loading = false;
         data.error = true;
+    }
+}
+
+async function handleTabChange(tab) {
+    data.loading = true;
+    updateRoute({ tab: tab.props.name });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    data.loading = false;
+}
+
+function updateRoute({ tab }) {
+    const { collectionId, itemId } = $route.params;
+    if (tab === "metadata") {
+        if (collectionId && !itemId) {
+        } else if (collectionId && itemId) {
+        } else if (itemId && !collectionId) {
+            $router.push({ path: `/items/${itemId}` });
+        }
+    } else if (tab === "content") {
+        $router.push({ query: "" });
     }
 }
 
