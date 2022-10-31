@@ -18,23 +18,17 @@ export function getFilesByName({ formats, crate }) {
     });
 }
 
-export function updateRouterLocation({ router, route, hash, type }) {
-    if (route.hash === `#${hash}` && route.query?.type === type) return window.location;
-    router.replace({
-        hash,
-        query: {
-            ...route.query,
-            type,
-        },
-    });
-    return window.location;
-}
-
-export async function getPresignedUrl({ $http, identifier, filename }) {
-    let response = await $http.get({
-        route: `/item/${identifier}/presigned-url`,
-        params: { filename },
-    });
+export async function getPresignedUrl({ $http, $route, filename }) {
+    const { collectionId, itemId } = $route.params;
+    let response;
+    if (collectionId && itemId) {
+        response = await $http.get({
+            route: `/collections/${collectionId}/items/${itemId}/pre-signed-url/${filename}`,
+        });
+        data.type = "item";
+    } else if (itemId && !collectionId) {
+        response = await $http.get({ route: `/items/${itemId}/pre-signed-url/${filename}` });
+    }
     if (response.status === 200) {
         return (await response.json()).url;
     }
