@@ -8,6 +8,7 @@ config.autoReplaceSvg = "nest";
 
 import { createApp } from "vue";
 import DescriboCrateBuilder from "@describo/crate-builder-component";
+import VueScrollTo from "vue-scrollto";
 import App from "./App.vue";
 import { router } from "./routes.js";
 import { store } from "./store.js";
@@ -32,6 +33,7 @@ import HTTPService from "./http.service";
         app.use(router({ configuration }));
         app.use(ElementPlus);
         app.use(DescriboCrateBuilder);
+        app.use(VueScrollTo);
         app.config.globalProperties.$http = new HTTPService({ router });
         app.provide("$http", app.config.globalProperties.$http);
         app.config.globalProperties.$log = log;
