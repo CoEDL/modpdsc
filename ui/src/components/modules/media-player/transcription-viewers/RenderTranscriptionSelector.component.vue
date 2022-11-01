@@ -1,51 +1,34 @@
 <template>
-    <div class="flex flex-col">
-        <el-radio-group
-            v-model="selectedTranscription"
-            @change="loadTranscription"
-            class="flex flex-wrap my-4"
-            :class="{ 'flex-col': this.layout === 'column' }"
+    <el-radio-group
+        class="flex flex-row"
+        v-model="data.selectedTranscription"
+        @change="loadTranscription"
+    >
+        <el-radio
+            v-for="transcription of props.transcriptions"
+            :key="transcription['@id']"
+            :label="transcription['@id']"
         >
-            <el-radio
-                v-for="(transcription, idx) of transcriptions"
-                :key="idx"
-                :label="transcription['@id']"
-                >{{ transcription["@id"] }}</el-radio
-            >
-        </el-radio-group>
-    </div>
+            {{ transcription["@id"] }}
+        </el-radio>
+    </el-radio-group>
 </template>
 
-<script>
-import { DataLoader } from "src/services/data-loader.service";
-const dataLoader = new DataLoader();
+<script setup>
+import { reactive } from "vue";
 
-export default {
-    props: {
-        transcriptions: {
-            type: Array,
-            required: true,
-        },
-        layout: {
-            type: String,
-        },
+const $emit = defineEmits(["load-transcription"]);
+const props = defineProps({
+    transcriptions: {
+        type: Array,
+        required: true,
     },
-    data() {
-        return {
-            selectedTranscription: this.transcriptions[0],
-        };
-    },
-    methods: {
-        loadTranscription(transcription) {
-            this.$emit("load-transcription", transcription);
-        },
-    },
-};
-</script>
-
-<style lang="scss" scoped>
-.style-transcription {
-    height: 400px;
-    overflow: scroll;
+});
+const data = reactive({
+    selectedTranscription: props.transcriptions[0]["@id"],
+});
+function loadTranscription(transcription) {
+    transcription = props.transcriptions.filter((t) => t["@id"] === transcription)[0];
+    $emit("load-transcription", transcription);
 }
-</style>
+</script>

@@ -11,22 +11,20 @@
                 :key="sidx"
                 class="p-2"
                 :class="{
-                    'bg-yellow-200': highlightSegmentId === segment.id,
+                    'bg-stone-100': highlightSegmentId === segment.id,
                 }"
             >
                 <div :id="segment.id" class="pt-2"></div>
                 <div>
                     <div>
                         <el-button @click="playSegment(segment)" size="small">
-                            <i class="fas fa-play"></i>
-                            PLAY ({{ format(segment.time.begin) }})
+                            <i class="fas fa-play"></i>&nbsp; PLAY ({{
+                                format(segment.time.begin)
+                            }})
                         </el-button>
                     </div>
                 </div>
-                <div
-                    v-if="segment.value && segment.value.length"
-                    class="p-1 text-sm text-orange-500"
-                >
+                <div v-if="segment.value && segment.value.length" class="p-1 text-sm">
                     {{ segment.value }}
                 </div>
                 <div class="flex flex-row flex-wrap" v-if="segment.children.length">

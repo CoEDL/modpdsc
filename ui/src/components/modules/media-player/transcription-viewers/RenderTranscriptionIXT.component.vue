@@ -5,12 +5,11 @@
             :key="idx"
             :id="phrase.id"
             class="p-2"
-            :class="{ 'bg-yellow-200': highlightSegmentId === phrase.id }"
+            :class="{ 'bg-stone-100': highlightSegmentId === phrase.id }"
         >
             <div>
                 <el-button @click="playSegment(phrase)" size="small">
-                    <i class="fas fa-play"></i>
-                    PLAY ({{ format(phrase.time.begin) }})
+                    <i class="fas fa-play"></i>&nbsp; PLAY ({{ format(phrase.time.begin) }})
                 </el-button>
             </div>
             <div class="style-text">{{ phrase.transcription }}</div>

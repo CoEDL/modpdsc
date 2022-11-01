@@ -1,10 +1,6 @@
 <template>
     <div>
-        <div
-            v-for="(paragraph, idx) of transcription.segments.paragraphs"
-            :key="idx"
-            class="p-2"
-        >
+        <div v-for="(paragraph, idx) of transcription.segments.paragraphs" :key="idx" class="p-2">
             <div
                 v-for="(phrase, pidx) of paragraph.phrases"
                 :key="pidx"
@@ -14,8 +10,7 @@
             >
                 <div>
                     <el-button @click="playSegment(phrase)" size="small">
-                        <i class="fas fa-play"></i>
-                        PLAY ({{ format(phrase.time.begin) }})
+                        <i class="fas fa-play"></i>&nbsp; PLAY ({{ format(phrase.time.begin) }})
                     </el-button>
                 </div>
                 <div class="text-orange-500">
@@ -28,10 +23,7 @@
                         :key="widx"
                         class="flex flex-col m-2 border-2 p-2"
                     >
-                        <div
-                            v-for="(morpheme, midx) of word.morphemes"
-                            :key="midx"
-                        >
+                        <div v-for="(morpheme, midx) of word.morphemes" :key="midx">
                             {{ morpheme.text }}
                         </div>
                     </div>
