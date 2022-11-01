@@ -4,6 +4,7 @@ import restifyErrors from "restify-errors";
 const { NotFoundError, UnauthorizedError, ForbiddenError } = restifyErrors;
 import { loadConfiguration, route, routeAdmin } from "../common/index.js";
 import { Store } from "@coedl/nocfl-js";
+import { Parser } from "@coedl/transcription-parsers";
 
 export function setupRoutes({ server }) {
     server.get("/", (req, res, next) => {
@@ -11,16 +12,27 @@ export function setupRoutes({ server }) {
         next();
     });
     server.get("/configuration", getConfigurationHandler);
+
     server.get("/collections/:collectionId/metadata", getCollectionMetadataHandler);
-    server.get("/collections/:collectionId/items/:itemId/metadata", getItemMetadataHandler);
+
+    // default item route paths
     server.get("/items/:itemId/metadata", getItemMetadataHandler);
     server.get("/items/:itemId/pre-signed-url/:filename", getItemFilePresignedUrl);
+    server.get("/items/:itemId/transcription/:filename", getItemTranscriptionHandler);
+
+    // paradisec item route paths
+    server.get("/collections/:collectionId/items/:itemId/metadata", getItemMetadataHandler);
     server.get(
         "/collections/:collectionId/items/:itemId/pre-signed-url/:filename",
         getItemFilePresignedUrl
     );
+    server.get(
+        "/collections/:collectionId/items/:itemId/transcription/:filename",
+        getItemTranscriptionHandler
+    );
 }
 
+// TODO: this code does NOT have tests
 async function getConfigurationHandler(req, res, next) {
     let configuration = await loadConfiguration();
     res.send({
@@ -32,6 +44,7 @@ async function getConfigurationHandler(req, res, next) {
     next();
 }
 
+// TODO: this code does NOT have tests
 async function getCollectionMetadataHandler(req, res, next) {
     let configuration = await loadConfiguration();
     let store = new Store({
@@ -50,16 +63,11 @@ async function getCollectionMetadataHandler(req, res, next) {
     next();
 }
 
+// TODO: this code does NOT have tests
 async function getItemMetadataHandler(req, res, next) {
     let configuration = await loadConfiguration();
 
-    let identifier;
-    if (configuration.links === "paradisec" && req.params.collectionId && req.params.itemId) {
-        identifier = `${req.params.collectionId}_${req.params.itemId}`;
-    } else {
-        identifier = req.params.itemId;
-    }
-
+    const identifier = getItemIdentifier({ configuration, params: req.params });
     let store = new Store({
         domain: configuration.domain,
         className: "item",
@@ -75,16 +83,11 @@ async function getItemMetadataHandler(req, res, next) {
     next();
 }
 
+// TODO: this code does NOT have tests
 async function getItemFilePresignedUrl(req, res, next) {
     let configuration = await loadConfiguration();
 
-    let identifier;
-    if (configuration.links === "paradisec" && req.params.collectionId && req.params.itemId) {
-        identifier = `${req.params.collectionId}_${req.params.itemId}`;
-    } else {
-        identifier = req.params.itemId;
-    }
-
+    const identifier = getItemIdentifier({ configuration, params: req.params });
     let store = new Store({
         domain: configuration.domain,
         className: "item",
@@ -98,4 +101,44 @@ async function getItemFilePresignedUrl(req, res, next) {
     let url = await store.getPresignedUrl({ target: req.params.filename });
     res.send({ url });
     next();
+}
+
+// TODO: this code does NOT have tests
+async function getItemTranscriptionHandler(req, res, next) {
+    let configuration = await loadConfiguration();
+
+    const identifier = getItemIdentifier({ configuration, params: req.params });
+    let store = new Store({
+        domain: configuration.domain,
+        className: "item",
+        id: identifier,
+        credentials: configuration.api.s3,
+    });
+    let exists = await store.itemExists();
+    if (!exists) {
+        return next(new NotFoundError());
+    }
+    exists = await store.pathExists({ path: req.params.filename });
+    if (!exists) {
+        return next(new NotFoundError());
+    }
+    let xmlString = await store.get({ target: req.params.filename });
+
+    let parser = new Parser({
+        name: req.params.filename,
+        data: xmlString,
+    });
+    let transcription = await parser.parse();
+
+    res.send({ transcription });
+    next();
+}
+
+// TODO: this code does NOT have tests
+function getItemIdentifier({ configuration, params }) {
+    if (configuration.links === "paradisec" && params.collectionId && params.itemId) {
+        return `${params.collectionId}_${params.itemId}`;
+    } else {
+        return params.itemId;
+    }
 }
