@@ -1,98 +1,90 @@
 <template>
     <div class="flex flex-col lg:flex-row">
-        <div
-            class="w-full flex flex-col p-4"
-            :class="{ 'lg:w-2/5': transcriptions && transcriptions.length }"
-        >
+        <div class="w-full flex flex-col" :class="{ 'lg:w-2/5': hasTranscriptions }">
             <audio
                 ref="mediaElement"
                 controls
                 class="block w-full"
                 @timeupdate="notifyTranscription"
             >
-                <source :src="item.url" v-for="item of items" :key="item.url" />
+                <source :src="file.url" v-for="file of props.audioFiles" :key="file.url" />
                 Your browser does not support the <code>audio</code> element.
             </audio>
-            <!-- <render-transcription-selector-component
-                v-if="transcriptions && transcriptions.length"
-                :transcriptions="transcriptions"
+            <render-transcription-selector-component
+                v-if="hasTranscriptions"
+                :transcriptions="props.transcriptions"
                 v-on:load-transcription="loadTranscription"
-            /> -->
+            />
         </div>
-        <!-- <div
+        <div
             class="w-full border-l border-gray-300"
-            :class="{ 'lg:w-3/5': transcriptions && transcriptions.length }"
-            v-if="transcriptions && transcriptions.length"
+            :class="{ 'lg:w-3/5': hasTranscriptions }"
+            v-if="hasTranscriptions"
         >
             <render-transcriptions-component
-                :transcriptions="transcriptions"
-                :current-time="currentTime"
-                :selected-transcription="selectedTranscription"
+                class="font-light"
+                :transcriptions="props.transcriptions"
+                :current-time="data.currentTime"
+                :selected-transcription="data.selectedTranscription"
                 v-on:play-from="playFrom"
             />
-        </div> -->
+        </div>
     </div>
 </template>
 
-<script>
+<script setup>
 // import { mixin } from "../RenderMediaMixins";
 
 import RenderTranscriptionsComponent from "../transcription-viewers/RenderTranscriptions.component.vue";
 import RenderTranscriptionSelectorComponent from "../transcription-viewers/RenderTranscriptionSelector.component.vue";
+import { reactive, onMounted, computed, ref } from "vue";
+import { useRoute } from "vue-router";
+const $route = useRoute();
 
-export default {
-    components: {
-        RenderTranscriptionsComponent,
-        RenderTranscriptionSelectorComponent,
+const props = defineProps({
+    name: {
+        type: String,
+        required: true,
     },
-    props: {
-        name: {
-            type: String,
-            required: true,
-        },
-        items: {
-            type: Array,
-            required: true,
-        },
-        transcriptions: {
-            type: Array,
-            required: true,
-        },
+    audioFiles: {
+        type: Array,
+        required: true,
     },
-    data() {
-        return {
-            currentTime: 0,
-            selectedTranscription: undefined,
-        };
+    transcriptions: {
+        type: Array,
+        required: true,
     },
-    mounted() {
-        this.selectedTranscription =
-            this.transcriptions && this.transcriptions.length ? this.transcriptions[0] : undefined;
-        if (this.$route.query.transcription) {
-            setTimeout(() => {
-                this.playFrom({
-                    start: this.$route.query.begin,
-                    end: this.$route.query.end,
-                });
-            }, 3000);
-        }
-    },
-    methods: {
-        playFrom({ start, end }) {
-            this.$refs.mediaElement.currentTime = start;
-            this.$refs.mediaElement.play();
-            setTimeout(() => {
-                this.$refs.mediaElement.pause();
-            }, (end - start) * 1000);
-        },
-        notifyTranscription(time) {
-            if (this.$refs.mediaElement) this.currentTime = this.$refs.mediaElement.currentTime;
-        },
-        async loadTranscription(transcription) {
-            this.selectedTranscription = transcription;
-        },
-    },
-};
+});
+const data = reactive({
+    currentTime: 0,
+    selectedTranscription: {},
+});
+const hasTranscriptions = computed(() => props?.transcriptions.length);
+const mediaElement = ref(null);
+onMounted(() => {
+    data.selectedTranscription = props?.transcriptions?.length
+        ? props.transcriptions[0]
+        : undefined;
+    if ($route.query.transcription) {
+        setTimeout(() => {
+            playFrom({
+                start: $route.query.begin,
+                end: $route.query.end,
+            });
+        }, 3000);
+    }
+});
+function playFrom({ start, end }) {
+    mediaElement.value.currentTime = start;
+    mediaElement.value.play();
+    setTimeout(() => {
+        mediaElement.value.pause();
+    }, (end - start) * 1000);
+}
+function notifyTranscription(time) {
+    if (mediaElement.value) data.currentTime = mediaElement.value.currentTime;
+}
+async function loadTranscription(transcription) {
+    data.selectedTranscription = transcription;
+}
 </script>
-
-<style lang="scss" scoped></style>
