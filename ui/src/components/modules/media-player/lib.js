@@ -1,4 +1,3 @@
-// import { ROCrate } from "ro-crate";
 import { CrateManager } from "@/crate-manager.js";
 
 export function getFilesByEncoding({ formats, crate }) {
@@ -13,19 +12,22 @@ export function getFilesByEncoding({ formats, crate }) {
 export function getFilesByName({ formats, crate }) {
     crate = new CrateManager({ crate });
     let rootDataset = crate.getRootDataset();
-    return rootDataset.hasPart.filter((file) => {
-        return formats.includes(file["@id"].split(".").pop());
-    });
+    let parts = rootDataset.hasPart
+        .filter((file) => {
+            return formats.includes(file["@id"].split(".").pop());
+        })
+        .map((file) => crate.getEntity({ id: file["@id"] }));
+    return parts;
 }
 
 export async function getPresignedUrl({ $http, $route, filename }) {
+    await new Promise((resolve) => setTimeout(resolve, 200));
     const { collectionId, itemId } = $route.params;
     let response;
     if (collectionId && itemId) {
         response = await $http.get({
             route: `/collections/${collectionId}/items/${itemId}/pre-signed-url/${filename}`,
         });
-        data.type = "item";
     } else if (itemId && !collectionId) {
         response = await $http.get({ route: `/items/${itemId}/pre-signed-url/${filename}` });
     }
@@ -33,4 +35,23 @@ export async function getPresignedUrl({ $http, $route, filename }) {
         return (await response.json()).url;
     }
     throw new Error(`Unable to get link to ${filename} in storage`);
+}
+
+export async function loadTranscription({ $http, $route, filename }) {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const { collectionId, itemId } = $route.params;
+    let response;
+    if (collectionId && itemId) {
+        response = await $http.get({
+            route: `/collections/${collectionId}/items/${itemId}/transcription/${filename}`,
+        });
+    } else if (itemId && !collectionId) {
+        response = await $http.get({ route: `/items/${itemId}/transcription/${filename}` });
+    }
+    if (response.status === 200) {
+        let { transcription } = await response.json();
+        return { transcription };
+    } else {
+        throw new Error({ code: response.status });
+    }
 }
