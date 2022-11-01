@@ -15,20 +15,33 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, watch } from "vue";
+import { useRoute } from "vue-router";
+const $route = useRoute();
 
-const $emit = defineEmits(["load-transcription"]);
+const $emit = defineEmits(["load-transcription", "update-route"]);
 const props = defineProps({
     transcriptions: {
         type: Array,
         required: true,
     },
+    selectedTranscription: {
+        type: String,
+        required: true,
+    },
 });
 const data = reactive({
-    selectedTranscription: props.transcriptions[0]["@id"],
+    selectedTranscription: props.selectedTranscription,
 });
+
+watch(
+    () => props.selectedTranscription,
+    () => {
+        data.selectedTranscription = props.selectedTranscription;
+    }
+);
+
 function loadTranscription(transcription) {
-    transcription = props.transcriptions.filter((t) => t["@id"] === transcription)[0];
-    $emit("load-transcription", transcription);
+    $emit("load-transcription", { transcription });
 }
 </script>

@@ -7,24 +7,21 @@ export let mixin = {
     props: {
         transcription: {
             type: Object,
-            required: true
+            required: true,
         },
         currentTime: {
-            type: Number
-        }
+            type: Number,
+        },
     },
     data() {
         return {
             watchers: {},
             highlightSegmentId: undefined,
-            throttleScrollToSegment: throttle(this.scrollToSegment, 1000)
+            throttleScrollTo: throttle(this.scrollTo, 1000),
         };
     },
     mounted() {
-        this.watchers.currentTime = this.$watch(
-            "currentTime",
-            this.throttleScrollToSegment
-        );
+        this.watchers.currentTime = this.$watch("currentTime", this.scrollToSegment);
     },
     beforeDestroy() {
         this.watchers.currentTime();
@@ -33,17 +30,12 @@ export let mixin = {
         playSegment(segment) {
             this.$emit("play-from", {
                 start: segment.time.begin,
-                end: segment.time.end
+                end: segment.time.end,
             });
-            setTimeout(() => {
-                const container = `#${this.transcription.displayName}`;
-                this.$scrollTo(`#${segment.id}`, 300, {
-                    container
-                });
-            }, 100);
+            this.throttleScrollTo(segment);
         },
         scrollToSegment(time) {
-            const container = `#${this.transcription.displayName}`;
+            const container = `#${this.transcription.selectedTranscription}`;
             let segments;
             switch (this.transcription.type) {
                 case "ixt":
@@ -51,28 +43,24 @@ export let mixin = {
                     break;
                 case "trs":
                     segments = flattenDeep(
-                        this.transcription.segments.episodes.map(e =>
-                            e.sections.map(s => s.turns)
+                        this.transcription.segments.episodes.map((e) =>
+                            e.sections.map((s) => s.turns)
                         )
                     );
                     break;
                 case "eaf":
                     segments = flattenDeep(
-                        this.transcription.timeslots.children.map(
-                            t => t.children
-                        )
+                        this.transcription.timeslots.children.map((t) => t.children)
                     );
                     break;
                 case "flextext":
                     segments = flattenDeep(
-                        this.transcription.segments.paragraphs.map(
-                            paragraph => paragraph.phrases
-                        )
+                        this.transcription.segments.paragraphs.map((paragraph) => paragraph.phrases)
                     );
                     break;
             }
             const segment = segments
-                .filter(segment => {
+                .filter((segment) => {
                     try {
                         return segment.time.begin <= time;
                     } catch (error) {
@@ -82,12 +70,16 @@ export let mixin = {
                 .pop();
             if (!segment) return;
             this.highlightSegmentId = segment.id;
+            this.throttleScrollTo(segment);
+        },
+        scrollTo(segment) {
+            const container = `#${this.transcription.selectedTranscription}`;
             this.$scrollTo(`#${segment.id}`, 300, {
-                container
+                container,
             });
         },
         format(seconds) {
             return format(seconds * 1000, "mm:ss");
-        }
-    }
+        },
+    },
 };

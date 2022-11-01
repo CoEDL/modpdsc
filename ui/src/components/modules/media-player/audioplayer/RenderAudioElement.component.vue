@@ -13,7 +13,8 @@
             <render-transcription-selector-component
                 v-if="hasTranscriptions"
                 :transcriptions="props.transcriptions"
-                v-on:load-transcription="loadTranscription"
+                :selected-transcription="props.selectedTranscription"
+                @load-transcription="loadTranscription"
             />
         </div>
         <div
@@ -24,25 +25,28 @@
             <render-transcriptions-component
                 class="font-light"
                 :transcriptions="props.transcriptions"
+                :selected-transcription="props.selectedTranscription"
                 :current-time="data.currentTime"
-                :selected-transcription="data.selectedTranscription"
-                v-on:play-from="playFrom"
+                @play-from="playFrom"
             />
         </div>
     </div>
 </template>
 
 <script setup>
-// import { mixin } from "../RenderMediaMixins";
-
 import RenderTranscriptionsComponent from "../transcription-viewers/RenderTranscriptions.component.vue";
 import RenderTranscriptionSelectorComponent from "../transcription-viewers/RenderTranscriptionSelector.component.vue";
 import { reactive, onMounted, computed, ref } from "vue";
 import { useRoute } from "vue-router";
 const $route = useRoute();
 
+const $emit = defineEmits(["update-route", "load-transcription"]);
 const props = defineProps({
-    name: {
+    selectedAudioFile: {
+        type: String,
+        required: true,
+    },
+    selectedTranscription: {
         type: String,
         required: true,
     },
@@ -62,29 +66,57 @@ const data = reactive({
 const hasTranscriptions = computed(() => props?.transcriptions.length);
 const mediaElement = ref(null);
 onMounted(() => {
-    data.selectedTranscription = props?.transcriptions?.length
-        ? props.transcriptions[0]
-        : undefined;
-    if ($route.query.transcription) {
+    init();
+});
+
+function init() {
+    // if ($route.query.transcription) {
+    //     data.selectedTranscription = props.transcriptions.filter(
+    //         (t) => t["@id"] === $route.query.transcription
+    //     )[0];
+    // } else {
+    //     data.selectedTranscription = props.transcriptions[0];
+    //     updateRoute({ transcription: data.selectedTranscription["@id"] });
+    // }
+
+    if ($route.query.transcription && $route.query.start && $route.query.end) {
         setTimeout(() => {
             playFrom({
-                start: $route.query.begin,
+                start: $route.query.start,
                 end: $route.query.end,
             });
-        }, 3000);
+        }, 1500);
     }
-});
+}
 function playFrom({ start, end }) {
-    mediaElement.value.currentTime = start;
-    mediaElement.value.play();
-    setTimeout(() => {
-        mediaElement.value.pause();
-    }, (end - start) * 1000);
+    if (!start || !end) return;
+    updateRoute({ start, end });
+    try {
+        mediaElement.value.currentTime = start;
+        mediaElement.value.play();
+        setTimeout(() => {
+            mediaElement?.value?.pause();
+        }, (end - start) * 1000);
+    } catch (error) {
+        console.error(error);
+    }
 }
-function notifyTranscription(time) {
-    if (mediaElement.value) data.currentTime = mediaElement.value.currentTime;
+function notifyTranscription() {
+    if (mediaElement.value?.currentTime) data.currentTime = mediaElement.value.currentTime;
 }
-async function loadTranscription(transcription) {
-    data.selectedTranscription = transcription;
+async function loadTranscription({ transcription }) {
+    // updateRoute({ transcription: transcription["@id"] });
+    $emit("load-transcription", { transcription });
+}
+
+function updateRoute({ start, end }) {
+    if (start && end) {
+        let query = {
+            transcription: props.selectedTranscription,
+            start,
+            end,
+        };
+        $emit("update-route", { query });
+    }
 }
 </script>

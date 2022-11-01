@@ -136,8 +136,11 @@ function updateRoute(params) {
         basePath = `/items/${itemId}`;
     }
 
-    let { contentType, contentId } = params;
+    let { contentType, contentId, query } = params;
     contentId = contentId.split(".")[0];
-    $router.push({ path: `${basePath}/${contentType}/${contentId}` });
+
+    const path = `${basePath}/${contentType}/${contentId}`;
+
+    $router.push({ path, query });
 }
 </script>

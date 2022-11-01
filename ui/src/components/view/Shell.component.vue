@@ -116,8 +116,6 @@ function updateRoute({ tab }) {
         } else if (itemId && !collectionId) {
             $router.push({ path: `/items/${itemId}` });
         }
-    } else if (tab === "content") {
-        $router.push({ query: "" });
     }
 }
 

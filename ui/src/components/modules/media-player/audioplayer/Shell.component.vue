@@ -9,15 +9,18 @@
                 :page-size="1"
                 layout="total, prev, pager, next"
                 :total="data.total"
-                @current-change="update"
+                @current-change="handleCurrentChange"
             />
         </div>
         <render-audio-element-component
             class="p-2"
             v-if="data.ready"
-            :name="data.selectedAudioFile"
+            :selected-audio-file="data.selectedAudioFile"
+            :selected-transcription="data.selectedTranscription"
             :audioFiles="data.audioFiles[data.selectedAudioFile]"
-            :transcriptions="data.transcriptions[data.selectedAudioFile]"
+            :transcriptions="data.transcriptionFiles[data.selectedAudioFile]"
+            @update-route="updateRoute"
+            @load-transcription="loadTranscription"
         />
     </div>
 </template>
@@ -43,11 +46,12 @@ const props = defineProps({
     },
 });
 const data = reactive({
-    audio: {},
-    transcriptions: {},
+    audioFiles: {},
+    transcriptionFiles: {},
     current: 1,
     total: 0,
     selectedAudioFile: undefined,
+    selectedTranscription: undefined,
     itemLink: undefined,
     ready: false,
 });
@@ -55,6 +59,7 @@ onMounted(() => {
     init();
 });
 async function init() {
+    data.ready = false;
     let audioFiles = getFilesByEncoding({
         crate: props.crate,
         formats: $store.getters.getConfiguration.ui.audioFormats,
@@ -63,59 +68,41 @@ async function init() {
     audioFiles = orderBy(audioFiles, "name");
     data.audioFiles = groupBy(audioFiles, (a) => a["@id"].split(".").shift());
 
-    // if ($route.query.transcription) {
-    //     const transcription = $route.query.transcription.split(".").shift();
-    //     audioFiles = audioFiles.filter((v) => v.name.split(".").shift() === transcription);
-    // }
-
     let transcriptions = getFilesByName({
         crate: props.crate,
         formats: $store.getters.getConfiguration.ui.transcriptionFileExtensions,
     });
-    // if ($route.query.transcription) {
-    //     const transcription = $route.query.transcription;
-    //     transcriptions = transcriptions.filter((t) => t["@id"] === transcription);
-    // }
-    data.transcriptions = groupBy(transcriptions, (t) => t["@id"].split(".").shift());
+    data.transcriptionFiles = groupBy(transcriptions, (t) => t["@id"].split(".").shift());
 
     // console.log(JSON.stringify(transcriptions, null, 2));
     // console.log(JSON.stringify(audioFiles, null, 2));
+
+    // set current to whatever is in the route path if defined
+    Object.keys(data.audioFiles).forEach((file, idx) => {
+        if ($route.path.match(file)) {
+            data.current = idx + 1;
+        } else {
+            data.current = 1;
+        }
+    });
+
+    data.selectedAudioFile = Object.keys(data.audioFiles)[data.current - 1];
     data.total = Object.keys(data.audioFiles).length;
-    await setSelectedFile();
-    // for (let name of Object.keys(audioFiles)) {
-    //     data.audio[name] = [];
-    //     data.transcriptions[name] = [];
-    //     for (let audioFile of audioFiles[name]) {
-    //         let url = await getPresignedUrl({
-    //             $http: this.$http,
-    //             identifier: this.$route.params.identifier,
-    //             filename: audioFile["@id"],
-    //         });
-    //         this.audio[name].push({
-    //             ...audioFile,
-    //             url,
-    //         });
-    //     }
-    //     for (let transcription of transcriptions[name]) {
-    //         let url = await getPresignedUrl({
-    //             $http: this.$http,
-    //             identifier: this.$route.params.identifier,
-    //             filename: transcription["@id"],
-    //         });
-    //         this.transcriptions[name].push({
-    //             ...transcription,
-    //             url,
-    //         });
-    //     }
-    // }
+    await load();
 
-    // this.total = Object.keys(this.audio).length;
-    // if (this.$route.hash && this.$route.query?.type === "audio") {
-    //     this.current = Object.keys(this.audio).indexOf(this.$route.hash.replace("#", "")) + 1;
-    // }
-    // this.setSelectedFile();
+    if ($route.query.transcription) {
+        data.selectedTranscription = $route.query.transcription;
+    } else {
+        updateRoute({
+            query: {
+                transcription: data.transcriptionFiles[data.selectedAudioFile][0]["@id"],
+                start: 0,
+            },
+        });
+        data.selectedTranscription = data.transcriptionFiles[data.selectedAudioFile][0]["@id"];
+    }
+    data.ready = true;
 }
-
 async function load() {
     const file = data.audioFiles[data.selectedAudioFile][0];
     if (!file.url) {
@@ -127,21 +114,45 @@ async function load() {
         file.url = url;
     }
 }
-async function update(number) {
+async function loadTranscription({ transcription }) {
+    data.selectedTranscription = transcription;
+    updateRoute({
+        query: {
+            transcription,
+            start: 0,
+        },
+    });
+}
+async function handleCurrentChange(number) {
     data.current = number;
+    updateRoute({});
     await setSelectedFile();
 }
 async function setSelectedFile() {
     data.ready = false;
     data.selectedAudioFile = Object.keys(data.audioFiles)[data.current - 1];
-    $emit("update-route", {
-        contentType: "audio",
-        contentId: data.selectedAudioFile,
+    data.selectedTranscription = data.transcriptionFiles[data.selectedAudioFile][0]["@id"];
+    updateRoute({
+        query: {
+            transcription: data.selectedTranscription,
+            start: 0,
+        },
     });
     await load();
     data.ready = true;
     // this.$nextTick(() => {
     //     this.itemLink = window.location;
     // });
+}
+function updateRoute({ query }) {
+    const route = {
+        contentType: "audio",
+        contentId: data.selectedAudioFile,
+    };
+    if (query) {
+        $emit("update-route", { ...route, query });
+    } else {
+        $emit("update-route", { ...route });
+    }
 }
 </script>

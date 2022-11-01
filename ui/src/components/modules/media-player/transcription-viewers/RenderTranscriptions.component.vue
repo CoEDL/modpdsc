@@ -4,7 +4,7 @@
         <div
             class="overflow-scroll"
             :style="{ height: transcriptionPanelHeight }"
-            :id="data.transcription.displayName"
+            :id="data.transcription.selectedTranscription"
             v-if="!data.error"
         >
             <component
@@ -37,7 +37,7 @@ const props = defineProps({
         required: true,
     },
     selectedTranscription: {
-        type: Object,
+        type: String,
         required: true,
     },
     currentTime: {
@@ -59,10 +59,10 @@ data.watchers.selectedTranscription = watch(
     () => props.selectedTranscription,
     () => {
         load();
+        scrollToTop();
     }
 );
 
-console.log(window.innerWidth);
 let transcriptionPanelHeight = computed(() => {
     let subtract = window.innerWidth > 1024 ? 300 : 450;
     return `${window.innerHeight - subtract}px`;
@@ -74,26 +74,20 @@ onBeforeUnmount(() => {
     data.watchers.selectedTranscription();
 });
 async function load() {
-    if (!props.selectedTranscription?.["@id"]) return;
+    if (!props.selectedTranscription) return;
     try {
         let { transcription } = await loadTranscription({
             $http,
             $route,
-            filename: props.selectedTranscription["@id"],
+            filename: props.selectedTranscription,
         });
         if (isEmpty(transcription)) {
             data.error = true;
             return;
         }
         data.transcription = {
-            ...props.selectedTranscription,
+            selectedTranscription: props.selectedTranscription.split(".")[0],
             ...transcription,
-            displayName: (props.selectedTranscription.displayName = props.selectedTranscription[
-                "@id"
-            ]
-                .split(".")
-                .slice(0, -1)
-                .join(".")),
         };
         switch (data.transcription.type) {
             case "ixt":
@@ -110,14 +104,18 @@ async function load() {
                 break;
         }
         data.error = false;
-        setTimeout(() => {
-            scrollTo(`#${data.transcription.displayName}`, 300, {
-                container: `#${data.transcription.displayName}`,
-            });
-        }, 1500);
     } catch (error) {
         data.error = true;
         transcriptionRendererComponent.value = "";
+    }
+}
+function scrollToTop() {
+    if (!data.error && data.transcription.selectedTranscription) {
+        setTimeout(() => {
+            scrollTo(`#${data.transcription.selectedTranscription}`, 300, {
+                container: `#${data.transcription.selectedTranscription}`,
+            });
+        }, 1500);
     }
 }
 function playFrom({ start, end }) {
