@@ -6,19 +6,23 @@
                     <div class="text-lg py-2"><i class="fas fa-images"></i> Images</div>
                 </template>
                 <image-viewer-component
+                    class="my-1"
                     v-if="data.activeTab === 'image'"
                     :crate="this.crate"
                     @update-route="updateRoute"
                 />
             </el-tab-pane>
-            <!-- <el-tab-pane label="Audio" name="audio" v-if="enable.audio">
-                <span slot="label"> <i class="fas fa-volume-up"></i> Audio </span>
+            <el-tab-pane label="Audio" name="audio" v-if="data.enable.audio">
+                <template #label>
+                    <div class="text-lg py-2"><i class="fas fa-volume-up"></i> Audio</div>
+                </template>
                 <audio-player-component
+                    class="my-1"
+                    v-if="data.activeTab === 'audio'"
                     :crate="this.crate"
-                    v-if="activeTab === 'audio'"
                     @update-route="updateRoute"
                 />
-            </el-tab-pane> -->
+            </el-tab-pane>
             <!-- <el-tab-pane label="Video" name="video" v-if="enable.video">
                 <span slot="label"> <i class="fas fa-video"></i> Video </span>
                 <video-player-component
@@ -86,11 +90,11 @@ function init() {
             crate: props.crate,
             formats: $store.getters.getConfiguration.ui.imageFormats,
         }).length > 0;
-    // data.enable.audio =
-    //     getFilesByEncoding({
-    //         crate: this.crate,
-    //         formats: this.$store.state.configuration.ui.audioFormats,
-    //     }).length > 0;
+    data.enable.audio =
+        getFilesByEncoding({
+            crate: props.crate,
+            formats: $store.getters.getConfiguration.ui.audioFormats,
+        }).length > 0;
 
     // this.enable.video =
     //     getFilesByEncoding({
@@ -119,7 +123,7 @@ function setActiveTab() {
     // if (this.$route.hash && this.$route.query?.type) {
     //     this.activeTab = this.$route.query.type;
     // }
-    data.activeTab = "image";
+    data.activeTab = "audio";
 }
 function updateRoute(params) {
     const { collectionId, itemId } = $route.params;
