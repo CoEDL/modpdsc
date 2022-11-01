@@ -1,7 +1,8 @@
+ui/src/components/modules/media-player/imageviewer/Shell.component.vue
 <template>
-    <div class="flex flex-col rounded">
+    <div class="flex flex-col bg-indigo-100 p-1">
         <div class="flex flex-col md:flex-row md:space-x-2">
-            <div class="py-2">{{ data.currentImage.name }}</div>
+            <div class="p-2">{{ data.currentImage.name }}</div>
             <!-- <copy-to-clipboard-component :data="data.currentImage.url" /> -->
             <div class="flex-grow"></div>
             <el-pagination
@@ -12,7 +13,7 @@
                 @current-change="update"
             />
         </div>
-        <div class="mt-4">
+        <div class="mt-4 p-2">
             <div class="flex flex-col justify-around relative">
                 <div
                     v-if="data.currentImage.url"
@@ -51,7 +52,6 @@
 <script setup>
 import { getFilesByEncoding, getPresignedUrl } from "../lib";
 import { groupBy, uniq, orderBy, compact, cloneDeep } from "lodash";
-const { FullScreenViewer } = require("iv-viewer");
 // import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
 import { reactive, onMounted, nextTick, inject, computed } from "vue";
 import { useStore } from "vuex";
@@ -78,7 +78,7 @@ onMounted(() => {
     init();
 });
 let maxHeight = computed(() => {
-    return { height: `${window.innerHeight - 240}px` };
+    return { height: `${window.innerHeight - 280}px` };
 });
 
 async function init() {
@@ -119,7 +119,7 @@ async function loadImage() {
             maxRatio: 10,
             slider: true,
             zoomer: true,
-            height: window.innerHeight - 240,
+            height: window.innerHeight - 280,
         });
     } else {
         data.zoomist.update();
@@ -133,6 +133,8 @@ async function update(number) {
         contentType: "images",
         contentId: data.currentImage["@id"],
     });
+    // await nextTick();
+    // data.itemLink = window.location;
 }
 
 function refresh() {
