@@ -64,8 +64,8 @@ let data = reactive({
 });
 
 onBeforeMount(() => {
-    const { contentType, contentId } = $route.params;
-    if (contentType && contentId) data.activeTab = "content";
+    const { contentType } = $route.params;
+    if (contentType) data.activeTab = "content";
     updateRoute({ tab: data.activeTab });
 });
 onMounted(() => {
@@ -108,14 +108,16 @@ async function handleTabChange(tab) {
 
 function updateRoute({ tab }) {
     const { collectionId, itemId } = $route.params;
+    let path;
     if (tab === "metadata") {
         if (collectionId && !itemId) {
-            $router.push({ path: `/collections/${collectionId}` });
+            path = `/collections/${collectionId}`;
         } else if (collectionId && itemId) {
-            $router.push({ path: `/collections/${collectionId}/items/${itemId}` });
+            path = `/collections/${collectionId}/items/${itemId}`;
         } else if (itemId && !collectionId) {
-            $router.push({ path: `/items/${itemId}` });
+            path = `/items/${itemId}`;
         }
+        $router.push({ path });
     }
 }
 
