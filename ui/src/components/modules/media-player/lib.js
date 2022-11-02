@@ -1,4 +1,5 @@
 import { CrateManager } from "@/crate-manager.js";
+import { computed } from "vue";
 
 export function getFilesByEncoding({ formats, crate }) {
     crate = new CrateManager({ crate });
@@ -74,3 +75,8 @@ export async function loadTranscription({ $http, $route, filename }) {
         throw new Error({ code: response.status });
     }
 }
+
+export let panelHeight = computed(() => {
+    let subtract = window.innerWidth > 1024 ? 300 : 450;
+    return `${window.innerHeight - subtract}px`;
+});
