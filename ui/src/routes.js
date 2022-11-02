@@ -28,9 +28,16 @@ export function router({ configuration }) {
                     props: true,
                     children: [
                         {
-                            path: ":contentType/:contentId",
+                            path: ":contentType",
                             component: ViewComponent,
                             props: true,
+                            children: [
+                                {
+                                    path: ":contentId",
+                                    component: ViewComponent,
+                                    props: true,
+                                },
+                            ],
                         },
                     ],
                 },
@@ -40,9 +47,16 @@ export function router({ configuration }) {
                     props: true,
                     children: [
                         {
-                            path: ":contentType/:contentId",
+                            path: ":contentType",
                             component: ViewComponent,
                             props: true,
+                            children: [
+                                {
+                                    path: ":contentId",
+                                    component: ViewComponent,
+                                    props: true,
+                                },
+                            ],
                         },
                     ],
                 },
@@ -53,6 +67,7 @@ export function router({ configuration }) {
     const router = createRouter({
         history: createWebHistory("/"),
         routes,
+        strict: true,
     });
     return router;
 }
