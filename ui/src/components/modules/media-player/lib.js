@@ -37,6 +37,25 @@ export async function getPresignedUrl({ $http, $route, filename }) {
     throw new Error(`Unable to get link to ${filename} in storage`);
 }
 
+export async function getFile({ $http, $route, filename }) {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const { collectionId, itemId } = $route.params;
+    let response;
+    if (collectionId && itemId) {
+        response = await $http.get({
+            route: `/collections/${collectionId}/items/${itemId}/file/${filename}`,
+        });
+    } else if (itemId && !collectionId) {
+        response = await $http.get({ route: `/items/${itemId}/file/${filename}` });
+    }
+    if (response.status === 200) {
+        let { content } = await response.json();
+        return { content };
+    } else {
+        throw new Error({ code: response.status });
+    }
+}
+
 export async function loadTranscription({ $http, $route, filename }) {
     await new Promise((resolve) => setTimeout(resolve, 200));
     const { collectionId, itemId } = $route.params;
