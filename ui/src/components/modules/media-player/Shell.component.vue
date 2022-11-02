@@ -19,7 +19,7 @@
                 <audio-player-component
                     class="my-1"
                     v-if="data.activeTab === 'audio'"
-                    :crate="this.crate"
+                    :crate="props.crate"
                     @update-route="updateRoute"
                 />
             </el-tab-pane>
@@ -31,22 +31,28 @@
                     @update-route="updateRoute"
                 />
             </el-tab-pane> -->
-            <!-- <el-tab-pane label="Documents" name="document" v-if="enable.document">
-                <span slot="label"> <i class="fas fa-file-pdf"></i> Documents </span>
+            <el-tab-pane label="Documents" name="document" v-if="data.enable.document">
+                <template #label>
+                    <div class="text-lg py-2"><i class="fas fa-file-pdf"></i> Documents</div>
+                </template>
                 <document-viewer-component
+                    class="my-1"
+                    v-if="data.activeTab === 'document'"
                     :data="data"
-                    v-if="activeTab === 'document'"
                     @update-route="updateRoute"
                 />
-            </el-tab-pane> -->
-            <!-- <el-tab-pane label="XML Files" name="xml" v-if="enable.xml">
-                <span slot="label"> <i class="fas fa-file"></i> XML Files </span>
+            </el-tab-pane>
+            <el-tab-pane label="XML Files" name="xml" v-if="data.enable.xml">
+                <template #label>
+                    <div class="text-lg py-2"><i class="fas fa-code"></i> XML Files</div>
+                </template>
                 <xml-viewer-component
-                    :data="data"
-                    v-if="activeTab === 'xml'"
+                    class="my-1"
+                    v-if="data.activeTab === 'xml'"
+                    :crate="props.crate"
                     @update-route="updateRoute"
                 />
-            </el-tab-pane> -->
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>
@@ -95,35 +101,34 @@ function init() {
             crate: props.crate,
             formats: $store.getters.getConfiguration.ui.audioFormats,
         }).length > 0;
-
-    // this.enable.video =
-    //     getFilesByEncoding({
-    //         crate: this.crate,
-    //         formats: this.$store.state.configuration.ui.videoFormats,
-    //     }).length > 0;
-    // this.enable.document =
-    //     getFilesByName({
-    //         crate: this.crate,
-    //         formats: this.$store.state.configuration.ui.documentFileExtensions,
-    //     }).length > 0;
-    // this.enable.xml =
-    //     getFilesByEncoding({
-    //         crate: this.crate,
-    //         formats: ["application/xml"],
-    //     }).length > 0;
+    data.enable.video =
+        getFilesByEncoding({
+            crate: props.crate,
+            formats: $store.getters.getConfiguration.ui.videoFormats,
+        }).length > 0;
+    data.enable.document =
+        getFilesByName({
+            crate: props.crate,
+            formats: $store.getters.getConfiguration.ui.documentFileExtensions,
+        }).length > 0;
+    data.enable.xml =
+        getFilesByEncoding({
+            crate: props.crate,
+            formats: ["application/xml"],
+        }).length > 0;
     setActiveTab();
 }
 function setActiveTab() {
-    // for (let key of Object.keys(this.enable)) {
-    //     if (this.enable[key]) {
-    //         this.activeTab = key;
-    //         break;
-    //     }
-    // }
+    for (let key of Object.keys(data.enable)) {
+        if (data.enable[key]) {
+            data.activeTab = key;
+            break;
+        }
+    }
     // if (this.$route.hash && this.$route.query?.type) {
     //     this.activeTab = this.$route.query.type;
     // }
-    data.activeTab = "audio";
+    data.activeTab = "xml";
 }
 function updateRoute(params) {
     const { collectionId, itemId } = $route.params;
@@ -137,10 +142,12 @@ function updateRoute(params) {
     }
 
     let { contentType, contentId, query } = params;
-    contentId = contentId.split(".")[0];
-
-    const path = `${basePath}/${contentType}/${contentId}`;
-
+    let path;
+    if (contentId) {
+        path = `${basePath}/${contentType}/${contentId}`;
+    } else {
+        path = `${basePath}/${contentType}`;
+    }
     $router.push({ path, query });
 }
 </script>
