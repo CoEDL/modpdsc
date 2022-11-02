@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col bg-indigo-100 rounded p-4">
         <div class="flex flex-col md:flex-row md:space-x-2 my-2">
-            <div class="">{{ data.documentName }}</div>
+            <div class="p-2">{{ data.documentName }}</div>
             <!-- <copy-to-clipboard-component :data="itemLink" /> -->
             <div class="flex-grow"></div>
             <el-pagination
@@ -13,15 +13,19 @@
             />
         </div>
         <div v-if="data.error" class="text-center p-4">There was an error loading that file.</div>
-        <pre class="bg-black overflow-scroll" :style="{ height: panelHeight }" v-if="!data.error">
+        <pre
+            class="bg-black overflow-scroll"
+            :style="{ height: panelHeight }"
+            v-if="!data.error"
+            v-loading="data.loading"
+        >
             <code v-html="data.fileContent"></code>
         </pre>
     </div>
 </template>
 
 <script setup>
-import { getFilesByEncoding, getFile } from "../lib";
-import { cloneDeep, compact } from "lodash";
+import { getFilesByEncoding, getFile, panelHeight } from "../lib";
 import { reactive, onMounted, computed, inject } from "vue";
 import { useRoute } from "vue-router";
 import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
@@ -42,7 +46,6 @@ const props = defineProps({
 const data = reactive({
     error: false,
     documents: [],
-    pagerCount: window.innerWidth < 500 ? 5 : 7,
     total: 0,
     current: 1,
     fileContent: "",
@@ -52,10 +55,6 @@ const data = reactive({
 });
 onMounted(() => {
     init();
-});
-let panelHeight = computed(() => {
-    let subtract = window.innerWidth > 1024 ? 300 : 450;
-    return `${window.innerHeight - subtract}px`;
 });
 function init() {
     let documents = getFilesByEncoding({
@@ -73,6 +72,7 @@ function init() {
     updateRoute();
 }
 async function highlight() {
+    data.loading = true;
     data.documentName = data.documents[data.current - 1]["@id"];
     try {
         let { content } = await getFile({ $http, $route, filename: data.documentName });
@@ -81,6 +81,7 @@ async function highlight() {
     } catch (error) {
         data.error = true;
     }
+    data.loading = false;
     // this.$nextTick(() => {
     //     this.itemLink = window.location;
     // });

@@ -26,7 +26,7 @@ import { reactive, shallowRef, onMounted, onBeforeUnmount, watch, inject, comput
 import { useRoute } from "vue-router";
 import { isEmpty } from "lodash";
 import { scrollTo } from "vue-scrollto";
-import { loadTranscription } from "../lib.js";
+import { loadTranscription, panelHeight } from "../lib.js";
 const $http = inject("$http");
 const $route = useRoute();
 
@@ -63,10 +63,6 @@ data.watchers.selectedTranscription = watch(
     }
 );
 
-let panelHeight = computed(() => {
-    let subtract = window.innerWidth > 1024 ? 300 : 450;
-    return `${window.innerHeight - subtract}px`;
-});
 onMounted(() => {
     load();
 });
