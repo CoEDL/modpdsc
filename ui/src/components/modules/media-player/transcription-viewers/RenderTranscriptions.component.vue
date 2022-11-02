@@ -3,7 +3,7 @@
         <div v-if="data.error" class="text-center p-4">There was an error loading that file.</div>
         <div
             class="overflow-scroll"
-            :style="{ height: transcriptionPanelHeight }"
+            :style="{ height: panelHeight }"
             :id="data.transcription.selectedTranscription"
             v-if="!data.error"
         >
@@ -63,7 +63,7 @@ data.watchers.selectedTranscription = watch(
     }
 );
 
-let transcriptionPanelHeight = computed(() => {
+let panelHeight = computed(() => {
     let subtract = window.innerWidth > 1024 ? 300 : 450;
     return `${window.innerHeight - subtract}px`;
 });
