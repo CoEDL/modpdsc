@@ -19,6 +19,7 @@ export function setupRoutes({ server }) {
     server.get("/items/:itemId/metadata", getItemMetadataHandler);
     server.get("/items/:itemId/pre-signed-url/:filename", getItemFilePresignedUrl);
     server.get("/items/:itemId/transcription/:filename", getItemTranscriptionHandler);
+    server.get("/items/:itemId/file/:filename", getItemFileHandler);
 
     // paradisec item route paths
     server.get("/collections/:collectionId/items/:itemId/metadata", getItemMetadataHandler);
@@ -30,6 +31,7 @@ export function setupRoutes({ server }) {
         "/collections/:collectionId/items/:itemId/transcription/:filename",
         getItemTranscriptionHandler
     );
+    server.get("/collections/:collectionId/items/:itemId/file/:filename", getItemFileHandler);
 }
 
 // TODO: this code does NOT have tests
@@ -100,6 +102,32 @@ async function getItemFilePresignedUrl(req, res, next) {
     }
     let url = await store.getPresignedUrl({ target: req.params.filename });
     res.send({ url });
+    next();
+}
+
+// TODO: this code does NOT have tests
+async function getItemFileHandler(req, res, next) {
+    let configuration = await loadConfiguration();
+
+    const identifier = getItemIdentifier({ configuration, params: req.params });
+    let store = new Store({
+        domain: configuration.domain,
+        className: "item",
+        id: identifier,
+        credentials: configuration.api.s3,
+    });
+    let exists = await store.itemExists();
+    if (!exists) {
+        return next(new NotFoundError());
+    }
+    exists = await store.pathExists({ path: req.params.filename });
+    if (!exists) {
+        return next(new NotFoundError());
+    }
+
+    let content = await store.get({ target: req.params.filename });
+
+    res.send({ content });
     next();
 }
 
