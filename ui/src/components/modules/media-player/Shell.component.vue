@@ -23,22 +23,24 @@
                     @update-route="updateRoute"
                 />
             </el-tab-pane>
-            <!-- <el-tab-pane label="Video" name="video" v-if="enable.video">
-                <span slot="label"> <i class="fas fa-video"></i> Video </span>
+            <el-tab-pane label="Video" name="video" v-if="data.enable.video">
+                <template #label>
+                    <div class="text-lg py-2"><i class="fas fa-video"></i> Videos</div>
+                </template>
                 <video-player-component
-                    :data="data"
-                    v-if="activeTab === 'video'"
+                    v-if="data.activeTab === 'video'"
+                    :crate="props.crate"
                     @update-route="updateRoute"
                 />
-            </el-tab-pane> -->
+            </el-tab-pane>
             <el-tab-pane label="Documents" name="document" v-if="data.enable.document">
                 <template #label>
-                    <div class="text-lg py-2"><i class="fas fa-file-pdf"></i> Documents</div>
+                    <div class="text-lg py-2"><i class="fas fa-file"></i> Documents</div>
                 </template>
                 <document-viewer-component
                     class="my-1"
                     v-if="data.activeTab === 'document'"
-                    :data="data"
+                    :crate="props.crate"
                     @update-route="updateRoute"
                 />
             </el-tab-pane>
@@ -128,7 +130,7 @@ function setActiveTab() {
     // if (this.$route.hash && this.$route.query?.type) {
     //     this.activeTab = this.$route.query.type;
     // }
-    data.activeTab = "xml";
+    data.activeTab = "document";
 }
 function updateRoute(params) {
     const { collectionId, itemId } = $route.params;
