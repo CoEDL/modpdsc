@@ -2,7 +2,7 @@
     <div class="flex flex-col bg-indigo-100 p-1">
         <div class="flex flex-col md:flex-row md:space-x-2">
             <div class="p-2">{{ data.currentImage.name }}</div>
-            <!-- <copy-to-clipboard-component :data="data.currentImage.url" /> -->
+            <copy-to-clipboard-component class="p-2" :data="data.itemLink" />
             <div class="flex-grow"></div>
             <el-pagination
                 v-model:currentPage="data.current"
@@ -50,8 +50,8 @@
 
 <script setup>
 import { getFilesByEncoding, getPresignedUrl } from "../lib";
-import { groupBy, uniq, orderBy, compact, cloneDeep } from "lodash";
-// import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
+import { groupBy, uniq } from "lodash";
+import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
 import { reactive, onMounted, nextTick, inject, computed } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
@@ -72,6 +72,7 @@ const data = reactive({
     imagesGroupedByName: {},
     currentImage: [],
     current: 1,
+    itemLink: "",
 });
 onMounted(() => {
     init();
@@ -94,6 +95,9 @@ async function init() {
         images.map((image) => image["@id"].split("/").pop().split(".")[0])
     ).sort();
     update(1);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
 }
 
 async function loadImage() {
@@ -130,13 +134,12 @@ async function update(number) {
     await loadImage();
     $emit("update-route", {
         contentType: "images",
-        // contentId: data.currentImage["@id"],
         query: {
             file: data.currentImage["@id"],
         },
     });
-    // await nextTick();
-    // data.itemLink = window.location;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
 }
 
 function refresh() {

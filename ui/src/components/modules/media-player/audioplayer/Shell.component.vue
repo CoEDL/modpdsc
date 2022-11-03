@@ -2,7 +2,7 @@
     <div class="flex flex-col bg-indigo-100 p-1">
         <div class="flex flex-col md:flex-row md:space-x-2">
             <div class="p-2">{{ data.selectedAudioFile }}</div>
-            <!-- <copy-to-clipboard-component :data="itemLink" /> -->
+            <copy-to-clipboard-component class="p-2" :data="data.itemLink" />
             <div class="flex-grow"></div>
             <el-pagination
                 v-model:currentPage="data.current"
@@ -27,10 +27,10 @@
 
 <script setup>
 import { getFilesByEncoding, getPresignedUrl, getFilesByName } from "../lib";
-import { cloneDeep, compact, orderBy, groupBy } from "lodash";
+import { orderBy, groupBy } from "lodash";
 import RenderAudioElementComponent from "./RenderAudioElement.component.vue";
 import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
-import { reactive, onMounted, nextTick, inject, computed } from "vue";
+import { reactive, onMounted, inject } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 const $http = inject("$http");
@@ -51,7 +51,7 @@ const data = reactive({
     total: 0,
     selectedAudioFile: undefined,
     selectedTranscription: undefined,
-    itemLink: undefined,
+    itemLink: "",
     ready: false,
 });
 onMounted(() => {
@@ -89,7 +89,7 @@ async function init() {
     data.total = Object.keys(data.audioFiles).length;
     await load();
 
-    if ($route.query.transcription) {
+    if ($route.query.transcription && $route.query.contentType === "audio") {
         data.selectedTranscription = $route.query.transcription;
     } else {
         updateRoute({
@@ -100,6 +100,8 @@ async function init() {
         });
         data.selectedTranscription = data.transcriptionFiles[data.selectedAudioFile][0]["@id"];
     }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
     data.ready = true;
 }
 async function load() {
@@ -139,12 +141,10 @@ async function setSelectedFile() {
     });
     await load();
     data.ready = true;
-    // this.$nextTick(() => {
-    //     this.itemLink = window.location;
-    // });
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
 }
 function updateRoute({ query }) {
-    console.log("audio update route");
     const route = {
         contentType: "audio",
         contentId: data.selectedAudioFile,

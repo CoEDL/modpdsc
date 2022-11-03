@@ -2,7 +2,7 @@
     <div class="flex flex-col bg-indigo-100 p-1">
         <div class="flex flex-col md:flex-row md:space-x-2">
             <div class="p-2">{{ data.documentName }}</div>
-            <!-- <copy-to-clipboard-component :data="itemLink" /> -->
+            <copy-to-clipboard-component class="p-2" :data="data.itemLink" />
             <div class="flex-grow"></div>
             <el-pagination
                 v-model:currentPage="data.current"
@@ -51,12 +51,12 @@ const data = reactive({
     fileContent: "",
     loading: false,
     documentName: undefined,
-    itemLink: undefined,
+    itemLink: "",
 });
 onMounted(() => {
     init();
 });
-function init() {
+async function init() {
     let documents = getFilesByEncoding({
         crate: props.crate,
         formats: ["application/xml"],
@@ -73,6 +73,8 @@ function init() {
     }
     highlight();
     updateRoute();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
 }
 async function highlight() {
     data.loading = true;
@@ -85,14 +87,13 @@ async function highlight() {
         data.error = true;
     }
     data.loading = false;
-    // this.$nextTick(() => {
-    //     this.itemLink = window.location;
-    // });
 }
 async function handleCurrentChange(number) {
     data.current = number;
     updateRoute();
     highlight();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
 }
 function updateRoute() {
     const file = data.documents[data.current - 1]["@id"];
@@ -102,11 +103,3 @@ function updateRoute() {
     $emit("update-route", { ...route, query: { file } });
 }
 </script>
-
-<style lang="scss" scoped>
-.style-file-view {
-    background-color: black;
-    height: calc(100vh - 250px);
-    overflow: scroll;
-}
-</style>

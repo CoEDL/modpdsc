@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row md:space-x-2">
             <div class="p-2">{{ data.documentName }}</div>
 
-            <!-- <copy-to-clipboard-component :data="itemLink" /> -->
+            <copy-to-clipboard-component class="p-2" :data="data.itemLink" />
             <div class="flex-grow"></div>
             <el-pagination
                 v-model:currentPage="data.current"
@@ -43,7 +43,7 @@ import { getFilesByName, getPresignedUrl, panelHeight } from "../lib";
 import { reactive, onMounted, computed, inject } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
-// import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
+import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
 const $http = inject("$http");
 const $store = useStore();
 const $route = useRoute();
@@ -62,7 +62,7 @@ const data = reactive({
     current: 1,
     selectedFileUrl: undefined,
     documentName: undefined,
-    itemLink: undefined,
+    itemLink: "",
     viewer: {
         google: "https://docs.google.com/viewer?url",
         microsoft: "https://view.officeapps.live.com/op/embed.aspx?src",
@@ -71,7 +71,7 @@ const data = reactive({
 onMounted(() => {
     init();
 });
-function init() {
+async function init() {
     let documents = getFilesByName({
         crate: props.crate,
         formats: $store.getters.getConfiguration.ui.documentFileExtensions,
@@ -88,6 +88,8 @@ function init() {
     }
     setSelectedFile();
     updateRoute();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
 }
 async function setSelectedFile() {
     data.documentName = data.documents[data.current - 1]["@id"];
@@ -102,11 +104,14 @@ async function setSelectedFile() {
     // this.$nextTick(() => {
     //     this.itemLink = window.location;
     // });
+    data.itemLink = window.location.href;
 }
 async function handleCurrentChange(number) {
     data.current = number;
     updateRoute({});
     await setSelectedFile();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
 }
 function updateRoute() {
     const file = data.documents[data.current - 1]["@id"];

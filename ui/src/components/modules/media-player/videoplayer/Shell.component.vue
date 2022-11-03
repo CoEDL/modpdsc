@@ -2,7 +2,7 @@
     <div class="flex flex-col bg-indigo-100 p-1">
         <div class="flex flex-col md:flex-row md:space-x-2">
             <div class="p-2">{{ data.selectedVideoFile }}</div>
-            <!-- <copy-to-clipboard-component :data="itemLink" /> -->
+            <copy-to-clipboard-component class="p-2" :data="data.itemLink" />
             <div class="flex-grow"></div>
             <el-pagination
                 v-model:currentPage="data.current"
@@ -27,10 +27,10 @@
 
 <script setup>
 import { getFilesByEncoding, getPresignedUrl, getFilesByName } from "../lib";
-import { cloneDeep, compact, orderBy, groupBy } from "lodash";
+import { orderBy, groupBy } from "lodash";
 import RenderVideoElementComponent from "./RenderVideoElement.component.vue";
 import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
-import { reactive, onMounted, nextTick, inject, computed } from "vue";
+import { reactive, onMounted, inject } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 const $http = inject("$http");
@@ -52,6 +52,7 @@ const data = reactive({
     selectedVideoFile: undefined,
     selectedTranscription: undefined,
     ready: false,
+    itemLink: "",
 });
 onMounted(() => {
     init();
@@ -88,7 +89,7 @@ async function init() {
     data.total = Object.keys(data.videoFiles).length;
     await load();
 
-    if ($route.query.transcription) {
+    if ($route.query.transcription && $route.query.contentType === "video") {
         data.selectedTranscription = $route.query.transcription;
     } else {
         updateRoute({
@@ -99,6 +100,8 @@ async function init() {
         });
         data.selectedTranscription = data.transcriptionFiles[data.selectedVideoFile][0]["@id"];
     }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
     data.ready = true;
 }
 async function load() {
@@ -138,12 +141,10 @@ async function setSelectedFile() {
     });
     await load();
     data.ready = true;
-    // this.$nextTick(() => {
-    //     this.itemLink = window.location;
-    // });
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    data.itemLink = window.location.href;
 }
 function updateRoute({ query }) {
-    console.log("video update route");
     const route = {
         contentType: "video",
         contentId: data.selectedVideoFile,
