@@ -131,7 +131,10 @@ async function update(number) {
     await loadImage();
     $emit("update-route", {
         contentType: "images",
-        contentId: data.currentImage["@id"],
+        // contentId: data.currentImage["@id"],
+        query: {
+            file: data.currentImage["@id"],
+        },
     });
     // await nextTick();
     // data.itemLink = window.location;
