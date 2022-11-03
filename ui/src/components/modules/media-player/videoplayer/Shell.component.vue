@@ -1,126 +1,157 @@
 <template>
-    <div class="flex flex-col bg-indigo-100 rounded p-4">
-        <div class="flex flex-col md:flex-row md:space-x-2 my-2">
-            <div class="">{{ selectedName }}</div>
-            <copy-to-clipboard-component :data="itemLink" />
+    <div class="flex flex-col bg-indigo-100 p-1">
+        <div class="flex flex-col md:flex-row md:space-x-2">
+            <div class="p-2">{{ data.selectedVideoFile }}</div>
+            <!-- <copy-to-clipboard-component :data="itemLink" /> -->
             <div class="flex-grow"></div>
             <el-pagination
-                :background="true"
-                layout="prev, pager, next"
-                :current-page.sync="current"
+                v-model:currentPage="data.current"
                 :page-size="1"
-                :total="total"
-                @current-change="update"
-            ></el-pagination>
+                layout="total, prev, pager, next"
+                :total="data.total"
+                @current-change="handleCurrentChange"
+            />
         </div>
         <render-video-element-component
-            v-if="selectedName"
-            class="bg-indigo-100 rounded my-4"
-            :items="video[selectedName]"
-            :name="selectedName"
-            :transcriptions="transcriptions[selectedName]"
+            class="p-2"
+            v-if="data.ready"
+            :selected-video-file="data.selectedVideoFile"
+            :selected-transcription="data.selectedTranscription"
+            :videoFiles="data.videoFiles[data.selectedVideoFile]"
+            :transcriptions="data.transcriptionFiles[data.selectedVideoFile]"
+            @update-route="updateRoute"
+            @load-transcription="loadTranscription"
         />
     </div>
 </template>
 
-<script>
-import { getFilesByEncoding, getFilesByName } from "../lib";
+<script setup>
+import { getFilesByEncoding, getPresignedUrl, getFilesByName } from "../lib";
 import { cloneDeep, compact, orderBy, groupBy } from "lodash";
 import RenderVideoElementComponent from "./RenderVideoElement.component.vue";
 import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.component.vue";
+import { reactive, onMounted, nextTick, inject, computed } from "vue";
+import { useStore } from "vuex";
+import { useRoute } from "vue-router";
+const $http = inject("$http");
+const $store = useStore();
+const $route = useRoute();
+const $emit = defineEmits(["update-route"]);
 
-export default {
-    components: {
-        RenderVideoElementComponent,
-        CopyToClipboardComponent,
+const props = defineProps({
+    crate: {
+        type: Object,
+        required: true,
     },
-    props: {
-        data: {
-            type: Object,
-            required: true,
+});
+const data = reactive({
+    videoFiles: {},
+    transcriptionFiles: {},
+    current: 1,
+    total: 0,
+    selectedVideoFile: undefined,
+    selectedTranscription: undefined,
+    ready: false,
+});
+onMounted(() => {
+    init();
+});
+async function init() {
+    data.ready = false;
+    let videoFiles = getFilesByEncoding({
+        crate: props.crate,
+        formats: $store.getters.getConfiguration.ui.videoFormats,
+    });
+
+    videoFiles = orderBy(videoFiles, "name");
+    data.videoFiles = groupBy(videoFiles, (a) => a["@id"].split(".").shift());
+
+    let transcriptions = getFilesByName({
+        crate: props.crate,
+        formats: $store.getters.getConfiguration.ui.transcriptionFileExtensions,
+    });
+    data.transcriptionFiles = groupBy(transcriptions, (t) => t["@id"].split(".").shift());
+
+    // console.log(JSON.stringify(transcriptions, null, 2));
+    // console.log(JSON.stringify(videoFiles, null, 2));
+
+    // set current to whatever is in the route path if defined
+    Object.keys(data.videoFiles).forEach((file, idx) => {
+        if ($route.path.match(file)) {
+            data.current = idx + 1;
+        } else {
+            data.current = 1;
+        }
+    });
+
+    data.selectedVideoFile = Object.keys(data.videoFiles)[data.current - 1];
+    data.total = Object.keys(data.videoFiles).length;
+    await load();
+
+    if ($route.query.transcription) {
+        data.selectedTranscription = $route.query.transcription;
+    } else {
+        updateRoute({
+            query: {
+                transcription: data.transcriptionFiles[data.selectedVideoFile][0]["@id"],
+                start: 0,
+            },
+        });
+        data.selectedTranscription = data.transcriptionFiles[data.selectedVideoFile][0]["@id"];
+    }
+    data.ready = true;
+}
+async function load() {
+    const file = data.videoFiles[data.selectedVideoFile][0];
+    if (!file.url) {
+        let url = await getPresignedUrl({
+            $http,
+            $route,
+            filename: file["@id"],
+        });
+        file.url = url;
+    }
+}
+async function loadTranscription({ transcription }) {
+    data.selectedTranscription = transcription;
+    updateRoute({
+        query: {
+            transcription,
+            start: 0,
         },
-    },
-    data() {
-        return {
-            video: {},
-            transcriptions: {},
-            current: 1,
-            total: undefined,
-            selectedName: undefined,
-            itemLink: undefined,
-        };
-    },
-    mounted() {
-        this.init();
-    },
-    methods: {
-        init() {
-            let video = getFilesByEncoding({
-                rocrate: this.data.rocrate,
-                formats: this.$store.state.configuration.videoFormats,
-            });
-
-            const datafiles = cloneDeep(this.data.datafiles);
-            video = video.map((v) => {
-                if (!datafiles[v.name]) return undefined;
-                return {
-                    ...v,
-                    path: datafiles[v.name].pop().path,
-                };
-            });
-            video = compact(video);
-            video = orderBy(video, "name");
-
-            if (this.$route.query.transcription) {
-                const transcription = this.$route.query.transcription.split(".").shift();
-                video = video.filter((v) => v.name.split(".").shift() === transcription);
-            }
-            video = groupBy(video, (v) => v.name.split(".").shift());
-
-            let transcriptions = getFilesByName({
-                rocrate: this.data.rocrate,
-                formats: this.$store.state.configuration.transcriptionFileExtensions,
-            });
-            transcriptions = transcriptions.map((t) => {
-                if (!datafiles[t.name]) return undefined;
-                return {
-                    ...t,
-                    path: datafiles[t.name].pop().path,
-                };
-            });
-            transcriptions = compact(transcriptions);
-            if (this.$route.query.transcription) {
-                const transcription = this.$route.query.transcription;
-                transcriptions = transcriptions.filter((t) => t.name === transcription);
-            }
-            transcriptions = groupBy(transcriptions, (t) => t.name.split(".").shift());
-
-            // console.log(JSON.stringify(video, null, 2));
-            // console.log(JSON.stringify(transcriptions, null, 2));
-
-            this.video = video;
-            this.transcriptions = transcriptions;
-            this.total = Object.keys(this.video).length;
-            if (this.$route.hash && this.$route.query?.type === "video") {
-                this.current =
-                    Object.keys(this.video).indexOf(this.$route.hash.replace("#", "")) + 1;
-            }
-            this.setSelectedFile();
+    });
+}
+async function handleCurrentChange(number) {
+    data.current = number;
+    updateRoute({});
+    await setSelectedFile();
+}
+async function setSelectedFile() {
+    data.ready = false;
+    data.selectedVideoFile = Object.keys(data.videoFiles)[data.current - 1];
+    data.selectedTranscription = data.transcriptionFiles[data.selectedVideoFile][0]["@id"];
+    updateRoute({
+        query: {
+            transcription: data.selectedTranscription,
+            start: 0,
         },
-        update(number) {
-            this.current = number;
-            this.selectedName = undefined;
-            this.$nextTick(() => {
-                this.setSelectedFile();
-            });
-        },
-        setSelectedFile() {
-            this.selectedName = Object.keys(this.video)[this.current - 1];
-            this.$emit("update-route", { hash: this.selectedName, type: "video" });
-            this.$nextTick(() => {
-                this.itemLink = window.location;
-            });
-        },
-    },
-};
+    });
+    await load();
+    data.ready = true;
+    // this.$nextTick(() => {
+    //     this.itemLink = window.location;
+    // });
+}
+function updateRoute({ query }) {
+    console.log("video update route");
+    const route = {
+        contentType: "video",
+        contentId: data.selectedVideoFile,
+    };
+    if (query) {
+        $emit("update-route", { ...route, query });
+    } else {
+        $emit("update-route", { ...route });
+    }
+}
 </script>
