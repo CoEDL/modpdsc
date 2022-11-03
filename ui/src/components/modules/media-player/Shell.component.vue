@@ -1,13 +1,13 @@
 <template>
     <div>
         <el-tabs tab-position="left" v-model="data.activeTab">
-            <el-tab-pane label="Images" name="image" v-if="data.enable.image">
+            <el-tab-pane label="Images" name="images" v-if="data.enable.images">
                 <template #label>
                     <div class="text-lg py-2"><i class="fas fa-images"></i> Images</div>
                 </template>
                 <image-viewer-component
                     class="my-1"
-                    v-if="data.activeTab === 'image'"
+                    v-if="data.activeTab === 'images'"
                     :crate="this.crate"
                     @update-route="updateRoute"
                 />
@@ -33,13 +33,13 @@
                     @update-route="updateRoute"
                 />
             </el-tab-pane>
-            <el-tab-pane label="Documents" name="document" v-if="data.enable.document">
+            <el-tab-pane label="Documents" name="documents" v-if="data.enable.documents">
                 <template #label>
                     <div class="text-lg py-2"><i class="fas fa-file"></i> Documents</div>
                 </template>
                 <document-viewer-component
                     class="my-1"
-                    v-if="data.activeTab === 'document'"
+                    v-if="data.activeTab === 'documents'"
                     :crate="props.crate"
                     @update-route="updateRoute"
                 />
@@ -82,55 +82,55 @@ const props = defineProps({
 const data = reactive({
     activeTab: "images",
     enable: {
-        image: false,
+        images: false,
         audio: false,
         video: false,
-        document: false,
+        documents: false,
         xml: false,
     },
 });
 onMounted(() => {
     init();
 });
+const configuration = $store.getters.getConfiguration.ui;
 function init() {
-    data.enable.image =
+    data.enable.images =
         getFilesByEncoding({
             crate: props.crate,
             formats: $store.getters.getConfiguration.ui.imageFormats,
-        }).length > 0;
+        }).length > 0 && configuration.mediaplayer.enable.images;
     data.enable.audio =
         getFilesByEncoding({
             crate: props.crate,
             formats: $store.getters.getConfiguration.ui.audioFormats,
-        }).length > 0;
+        }).length > 0 && configuration.mediaplayer.enable.audio;
     data.enable.video =
         getFilesByEncoding({
             crate: props.crate,
             formats: $store.getters.getConfiguration.ui.videoFormats,
-        }).length > 0;
-    data.enable.document =
+        }).length > 0 && configuration.mediaplayer.enable.video;
+    data.enable.documents =
         getFilesByName({
             crate: props.crate,
             formats: $store.getters.getConfiguration.ui.documentFileExtensions,
-        }).length > 0;
+        }).length > 0 && configuration.mediaplayer.enable.documents;
     data.enable.xml =
         getFilesByEncoding({
             crate: props.crate,
             formats: ["application/xml"],
-        }).length > 0;
+        }).length > 0 && configuration.mediaplayer.enable.xmlFiles;
     setActiveTab();
 }
 function setActiveTab() {
-    for (let key of Object.keys(data.enable)) {
-        if (data.enable[key]) {
-            data.activeTab = key;
-            break;
+    data.activeTab = $route.params.contentType;
+    if (!data.activeTab) {
+        for (let key of Object.keys(data.enable)) {
+            if (data.enable[key]) {
+                data.activeTab = key;
+                break;
+            }
         }
     }
-    // if (this.$route.hash && this.$route.query?.type) {
-    //     this.activeTab = this.$route.query.type;
-    // }
-    data.activeTab = "document";
 }
 function updateRoute(params) {
     const { collectionId, itemId } = $route.params;
