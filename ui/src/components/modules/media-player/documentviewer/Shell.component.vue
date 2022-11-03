@@ -81,9 +81,13 @@ function init() {
 
     if ($route.query.file) {
         const ids = data.documents.map((d) => d["@id"]);
-        data.current = ids.indexOf($route.query.file) + 1;
+        const index = ids.indexOf($route.query.file);
+        if (index !== -1) {
+            data.current = ids.indexOf($route.query.file) + 1;
+        }
     }
     setSelectedFile();
+    updateRoute();
 }
 async function setSelectedFile() {
     data.documentName = data.documents[data.current - 1]["@id"];
