@@ -17,7 +17,7 @@ export let mixin = {
         return {
             watchers: {},
             highlightSegmentId: undefined,
-            throttleScrollTo: throttle(this.scrollTo, 1000),
+            throttleScrollTo: throttle(this.scrollTo, 800),
         };
     },
     mounted() {

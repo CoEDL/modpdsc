@@ -5,22 +5,18 @@
             :key="eidx"
             class="flex flex-col"
         >
-            <div
-                v-for="(section, sidx) of episode.sections"
-                :key="sidx"
-                class="flex flex-col"
-            >
+            <div v-for="(section, sidx) of episode.sections" :key="sidx" class="flex flex-col">
                 <div
                     v-for="(turn, tidx) of section.turns"
                     :key="tidx"
                     :id="turn.id"
-                    class="flex flex-row my-1 p-3 "
+                    class="flex flex-row my-1 p-3"
                     :class="{
-                        'bg-yellow-200': highlightSegmentId === turn.id
+                        'bg-yellow-200': highlightSegmentId === turn.id,
                     }"
                 >
                     <div class="mr-2 text-center">
-                        <el-button @click="playSegment(turn)" size="small">
+                        <el-button @click="playSegment(turn)">
                             <i class="fas fa-play"></i>
                             PLAY ({{ format(turn.time.begin) }})
                         </el-button>
@@ -36,7 +32,7 @@
 import { mixin } from "./RenderTranscriptionMixins";
 
 export default {
-    mixins: [mixin]
+    mixins: [mixin],
 };
 </script>
 

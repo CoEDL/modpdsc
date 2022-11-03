@@ -17,7 +17,7 @@
                 <div :id="segment.id" class="pt-2"></div>
                 <div>
                     <div>
-                        <el-button @click="playSegment(segment)" size="small">
+                        <el-button @click="playSegment(segment)">
                             <i class="fas fa-play"></i>&nbsp; PLAY ({{
                                 format(segment.time.begin)
                             }})

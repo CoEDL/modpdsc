@@ -9,7 +9,7 @@
                 :class="{ 'bg-yellow-200': highlightSegmentId === phrase.id }"
             >
                 <div>
-                    <el-button @click="playSegment(phrase)" size="small">
+                    <el-button @click="playSegment(phrase)">
                         <i class="fas fa-play"></i>&nbsp; PLAY ({{ format(phrase.time.begin) }})
                     </el-button>
                 </div>
