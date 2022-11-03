@@ -33,7 +33,6 @@ import CopyToClipboardComponent from "@/components/modules/CopyToClipboard.compo
 import { reactive, onMounted, nextTick, inject, computed } from "vue";
 import { useStore } from "vuex";
 import { useRoute } from "vue-router";
-import Zoomist from "zoomist";
 const $http = inject("$http");
 const $store = useStore();
 const $route = useRoute();
@@ -145,6 +144,7 @@ async function setSelectedFile() {
     // });
 }
 function updateRoute({ query }) {
+    console.log("audio update route");
     const route = {
         contentType: "audio",
         contentId: data.selectedAudioFile,

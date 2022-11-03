@@ -28,6 +28,7 @@
                     <div class="text-lg py-2"><i class="fas fa-video"></i> Videos</div>
                 </template>
                 <video-player-component
+                    class="my-1"
                     v-if="data.activeTab === 'video'"
                     :crate="props.crate"
                     @update-route="updateRoute"

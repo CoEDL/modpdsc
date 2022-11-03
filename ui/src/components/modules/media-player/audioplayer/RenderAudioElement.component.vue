@@ -70,15 +70,6 @@ onMounted(() => {
 });
 
 function init() {
-    // if ($route.query.transcription) {
-    //     data.selectedTranscription = props.transcriptions.filter(
-    //         (t) => t["@id"] === $route.query.transcription
-    //     )[0];
-    // } else {
-    //     data.selectedTranscription = props.transcriptions[0];
-    //     updateRoute({ transcription: data.selectedTranscription["@id"] });
-    // }
-
     if ($route.query.transcription && $route.query.start && $route.query.end) {
         setTimeout(() => {
             playFrom({

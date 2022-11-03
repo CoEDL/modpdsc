@@ -1,6 +1,6 @@
 <template>
-    <div class="flex flex-col bg-indigo-100">
-        <div class="flex flex-col md:flex-row md:space-x-2 my-3">
+    <div class="flex flex-col bg-indigo-100 p-1">
+        <div class="flex flex-col md:flex-row md:space-x-2">
             <div class="p-2">{{ data.documentName }}</div>
 
             <!-- <copy-to-clipboard-component :data="itemLink" /> -->

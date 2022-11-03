@@ -1,4 +1,3 @@
-ui/src/components/modules/media-player/imageviewer/Shell.component.vue
 <template>
     <div class="flex flex-col bg-indigo-100 p-1">
         <div class="flex flex-col md:flex-row md:space-x-2">
